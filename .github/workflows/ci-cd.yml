@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [main] # tạo PR vào main
 
+permissions:
+  contents: read # Đọc code
+  packages: write # Nếu push lên GitHub Packages
+  id-token: write # Cho OIDC token (deploy an toàn)
+
 jobs:
   # ══════════════════════════════════════════════════════
   # JOB 1: Test Backend
@@ -100,6 +105,9 @@ jobs:
   build-and-push:
     name: 🐳 Build & Push Docker
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: [test-backend, test-frontend] # phụ thuộc 2 job trên
     if: github.ref == 'refs/heads/main' # chỉ chạy trên main
 
