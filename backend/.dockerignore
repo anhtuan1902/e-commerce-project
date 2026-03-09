@@ -1,0 +1,21 @@
+# Không copy node_modules — sẽ được cài lại bên trong container
+node_modules
+
+# Log files
+npm-debug.log
+
+# File môi trường chứa thông tin nhạy cảm
+.env
+.env.*
+!.env.example    # ngoại lệ: .env.example thì OK
+
+# Git files — không cần thiết trong container
+.git
+.gitignore
+
+# Docs
+README.md
+*.md
+
+# Test coverage
+coverage/

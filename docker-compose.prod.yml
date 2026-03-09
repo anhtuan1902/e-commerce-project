@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: marketplace_mysql_prod
+    restart: always # luôn restart kể cả khi tự tắt (khác dev)
+    env_file:
+      - ./database/.env
+    volumes:
+      - mysql_data_prod:/var/lib/mysql
+    networks:
+      - marketplace_network
+  # KHÔNG có ports → DB không expose ra internet
+  # Chỉ backend trong cùng network mới kết nối được
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod # dùng Dockerfile production
+    container_name: marketplace_backend_prod
+    restart: always
+    env_file:
+      - ./backend/.env.production # file .env riêng cho production
+    environment:
+      NODE_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - marketplace_network
+    command: npm start # không dùng nodemon
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod # build React + Nginx
+    container_name: marketplace_frontend_prod
+    restart: always
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+    depends_on:
+      - backend
+    networks:
+      - marketplace_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace_redis_prod
+    restart: always
+    env_file:
+      - ./backend/.env.production
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data # lưu data khi restart
+    networks:
+      - marketplace_network
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+
+volumes:
+  mysql_data_prod:
+  redis_data_prod:
+
+networks:
+  marketplace_network:
+    driver: bridge

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 200" width="560" height="200">
+
+  <!-- === BAG ICON === -->
+  <g transform="translate(12, 8)">
+
+    <!-- Bag handles -->
+    <path d="M 50 72 C 50 30, 72 18, 88 18 C 104 18, 126 30, 126 72"
+          fill="none" stroke="#16A34A" stroke-width="9" stroke-linecap="round"/>
+
+    <!-- Bag body -->
+    <path d="M 18 72 L 14 162 Q 13 174, 25 174 L 151 174 Q 163 174, 162 162 L 158 72 Z"
+          fill="none" stroke="#16A34A" stroke-width="9" stroke-linejoin="round"/>
+
+    <!-- Handle end circles -->
+    <circle cx="50"  cy="72" r="7" fill="#16A34A"/>
+    <circle cx="126" cy="72" r="7" fill="#16A34A"/>
+
+    <!-- Network lines -->
+    <g stroke="#FACC15" stroke-width="2.2" fill="none">
+      <line x1="88" y1="108" x2="50"  y2="92"/>
+      <line x1="88" y1="108" x2="126" y2="92"/>
+      <line x1="88" y1="108" x2="35"  y2="130"/>
+      <line x1="88" y1="108" x2="141" y2="130"/>
+      <line x1="88" y1="108" x2="63"  y2="155"/>
+      <line x1="88" y1="108" x2="113" y2="155"/>
+      <line x1="88" y1="108" x2="88"  y2="168"/>
+      <line x1="50"  y1="92"  x2="35"  y2="130"/>
+      <line x1="50"  y1="92"  x2="63"  y2="155"/>
+      <line x1="35"  y1="130" x2="63"  y2="155"/>
+      <line x1="63"  y1="155" x2="88"  y2="168"/>
+      <line x1="126" y1="92"  x2="141" y2="130"/>
+      <line x1="126" y1="92"  x2="113" y2="155"/>
+      <line x1="141" y1="130" x2="113" y2="155"/>
+      <line x1="113" y1="155" x2="88"  y2="168"/>
+      <line x1="50"  y1="92"  x2="113" y2="155"/>
+      <line x1="126" y1="92"  x2="63"  y2="155"/>
+      <line x1="35"  y1="130" x2="113" y2="155"/>
+      <line x1="141" y1="130" x2="63"  y2="155"/>
+    </g>
+
+    <!-- Network nodes -->
+    <circle cx="88"  cy="108" r="7" fill="#FACC15"/>
+    <circle cx="50"  cy="92"  r="7" fill="#FACC15"/>
+    <circle cx="126" cy="92"  r="7" fill="#FACC15"/>
+    <circle cx="35"  cy="130" r="7" fill="#FACC15"/>
+    <circle cx="141" cy="130" r="7" fill="#FACC15"/>
+    <circle cx="63"  cy="155" r="7" fill="#FACC15"/>
+    <circle cx="113" cy="155" r="7" fill="#FACC15"/>
+    <circle cx="88"  cy="168" r="7" fill="#FACC15"/>
+  </g>
+
+  <!-- Text block centered vertically in 200px height -->
+  <!-- Block: ~80px total, center = 100, top = 60 -->
+  <text x="185" y="135"
+        font-family="Arial Black, Arial, sans-serif"
+        font-weight="900"
+        font-size="54"
+        fill="#1E3A8A">StoreOne</text>
+
+  <text x="208" y="165"
+        font-family="Arial, sans-serif"
+        font-weight="700"
+        font-size="21"
+        fill="#16A34A"
+        letter-spacing="5">E-COMMERCE</text>
+
+</svg>

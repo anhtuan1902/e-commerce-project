@@ -1,0 +1,90 @@
+services:
+  #── MySQL ──────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0 # dùng image có sẵn, không cần Dockerfile
+    container_name: marketplace_mysql
+    restart: unless-stopped # tự restart nếu crash, trừ khi tự tắt
+    env_file:
+      - ./database/.env
+    ports:
+      - "${MYSQL_PORT}:3306" # máy_thật:container — kết nối từ MySQL Workbench
+    volumes:
+      # Lưu data vào volume — restart container data không mất
+      - mysql_data:/var/lib/mysql
+    networks:
+      - marketplace_network
+    healthcheck:
+      # Kiểm tra MySQL đã sẵn sàng nhận kết nối chưa
+      # Backend sẽ chờ healthcheck này pass mới start
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s # kiểm tra mỗi 10 giây
+      timeout: 5s # timeout sau 5 giây
+      retries: 5 # thử lại 5 lần trước khi báo lỗi
+
+  # ── Backend ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend # Docker đọc Dockerfile trong folder này
+      dockerfile: Dockerfile # tên file Dockerfile
+    container_name: marketplace_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env # load tất cả biến từ file .env của backend
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      # Sync code từ máy thật vào container → hot reload
+      - ./backend:/app
+      # Giữ node_modules của container, không bị override bởi máy thật
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy # chờ MySQL healthy mới chạy
+    networks:
+      - marketplace_network
+    command: npm run dev # override CMD trong Dockerfile
+
+  # ── Frontend ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: marketplace_frontend
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - marketplace_network
+    command: npm run dev -- --host
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace_redis
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data # lưu data khi restart
+    networks:
+      - marketplace_network
+    command: sh -c 'redis-server --requirepass "$$REDIS_PASSWORD"'
+# ── Volumes ────────────────────────────────────────────
+volumes:
+  mysql_data: # Docker tự quản lý, data lưu ở /var/lib/docker/volumes/
+  redis_data:
+
+# ── Networks ───────────────────────────────────────────
+networks:
+  marketplace_network:
+    driver: bridge # các container cùng network có thể gọi nhau bằng tên service

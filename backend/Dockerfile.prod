@@ -1,0 +1,40 @@
+# ── STAGE 1: Builder ────────────────────────────────────
+# Stage này chỉ để cài deps và chuẩn bị code
+# Sẽ bị loại bỏ sau khi build xong → image cuối nhỏ hơn
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# npm ci: giống npm install nhưng:
+# - Nhanh hơn
+# - Chỉ cài đúng version trong package-lock.json
+# - --only=production: bỏ qua devDependencies (nodemon, jest...)
+RUN npm ci --only=production
+
+COPY . .
+
+# ── STAGE 2: Runner ─────────────────────────────────────
+# Stage này là image cuối cùng được deploy
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Tạo user riêng (không dùng root)
+# Nếu bị hack, attacker chỉ có quyền user thường, không phải root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+# Chỉ copy những gì CẦN THIẾT từ stage builder
+# Không copy devDependencies, test files...
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src          ./src
+COPY --from=builder /app/server.js    ./server.js
+COPY --from=builder /app/app.js       ./app.js
+COPY --from=builder /app/package.json ./package.json
+
+EXPOSE 5000
+
+# Chạy thẳng bằng node (không dùng nodemon)
+CMD ["node", "server.js"]

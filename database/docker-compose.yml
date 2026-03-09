@@ -1,0 +1,16 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce_store_one_db
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ecommerce_store_one_mysql_data:/var/lib/mysql
+
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  ecommerce_store_one_mysql_data:
