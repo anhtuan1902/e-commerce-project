@@ -42,6 +42,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy # chờ MySQL healthy mới chạy
+      redis:
+        condition: service_healthy # chờ Redis healthy mới chạy
     networks:
       - marketplace_network
     command: npm run dev # override CMD trong Dockerfile
@@ -79,6 +81,11 @@ services:
     networks:
       - marketplace_network
     command: sh -c 'redis-server --requirepass "$$REDIS_PASSWORD"'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 # ── Volumes ────────────────────────────────────────────
 volumes:
   mysql_data: # Docker tự quản lý, data lưu ở /var/lib/docker/volumes/

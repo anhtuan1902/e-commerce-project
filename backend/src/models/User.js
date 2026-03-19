@@ -1,9 +1,9 @@
-const { DataTypes } = require("sequelize");
-const bcrypt = require("bcrypt");
-const sequelize = require("../config/database");
+const { DataTypes } = require('sequelize');
+const bcrypt = require('bcrypt');
+const sequelize = require('../config/database');
 
 const User = sequelize.define(
-  "User",
+  'User',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -15,17 +15,17 @@ const User = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
       validate: {
-        notEmpty: { msg: "Tên không được để trống" },
-        len: { args: [2, 100], msg: "Tên phải từ 2-100 ký tự" },
+        notEmpty: { msg: 'Tên không được để trống' },
+        len: { args: [2, 100], msg: 'Tên phải từ 2-100 ký tự' },
       },
     },
 
     email: {
       type: DataTypes.STRING(150),
       allowNull: false,
-      unique: { msg: "Email đã tồn tại" },
+      unique: { msg: 'Email đã tồn tại' },
       validate: {
-        isEmail: { msg: "Email không hợp lệ" },
+        isEmail: { msg: 'Email không hợp lệ' },
       },
     },
 
@@ -35,8 +35,8 @@ const User = sequelize.define(
     },
 
     role: {
-      type: DataTypes.ENUM("admin", "vendor", "customer"),
-      defaultValue: "customer",
+      type: DataTypes.ENUM('admin', 'vendor', 'customer'),
+      defaultValue: 'customer',
     },
 
     // Google OAuth2
@@ -53,6 +53,7 @@ const User = sequelize.define(
     phone: {
       type: DataTypes.STRING,
       allowNull: true,
+      unique: { msg: 'Số điện thoại đã tồn tại' },
     },
 
     address: {
@@ -83,12 +84,12 @@ const User = sequelize.define(
     },
   },
   {
-    tableName: "users",
+    tableName: 'users',
     timestamps: true, // tự tạo createdAt, updatedAt
 
     // Ẩn password & refreshToken mặc định
     defaultScope: {
-      attributes: { exclude: ["password", "refreshToken"] },
+      attributes: { exclude: ['password', 'refreshToken'] },
     },
 
     scopes: {
@@ -102,7 +103,7 @@ const User = sequelize.define(
         }
       },
       beforeUpdate: async (user) => {
-        if (user.changed("password") && user.password) {
+        if (user.changed('password') && user.password) {
           user.password = await bcrypt.hash(user.password, 12);
         }
       },

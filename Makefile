@@ -1,5 +1,6 @@
 # make dev → khởi động môi trường dev
 dev:
+	docker compose build --no-cache
 	docker compose up -d
 	@echo "Frontend:   http://localhost:5173"
 	@echo "Backend:    http://localhost:5000"

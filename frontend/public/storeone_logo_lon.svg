@@ -51,13 +51,13 @@
 
   <!-- Text block centered vertically in 200px height -->
   <!-- Block: ~80px total, center = 100, top = 60 -->
-  <text x="185" y="135"
+  <text x="185" y="120"
         font-family="Arial Black, Arial, sans-serif"
         font-weight="900"
         font-size="54"
         fill="#1E3A8A">StoreOne</text>
 
-  <text x="208" y="165"
+  <text x="208" y="150"
         font-family="Arial, sans-serif"
         font-weight="700"
         font-size="21"
