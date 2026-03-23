@@ -1,10 +1,11 @@
-const redis = require("../config/redis");
+const redis = require('../config/redis');
 
 // Key pattern: refresh_token:{userId}:{tokenId}
 // Cho phép 1 user có nhiều phiên đăng nhập (nhiều thiết bị)
 const makeKey = (userId, tokenId) => `refresh_token:${userId}:${tokenId}`;
 
 const TTL = Number(process.env.REDIS_TTL) || 604800; // 7 ngày (giây)
+const ACCESS_TOKEN_TTL = Number(process.env.ACCESS_TOKEN_TTL) || 1800; // 30 phút (giây) cho access token, dùng để set cookie maxAge
 
 // ── Lưu Refresh Token vào Redis ───────────────────────
 // Gọi khi: đăng nhập, đăng ký, refresh token
@@ -65,7 +66,7 @@ const getAllSessions = async (userId) => {
   const sessions = await Promise.all(
     keys.map(async (key) => {
       const data = await redis.hgetall(key);
-      const tokenId = key.split(":")[2]; // lấy tokenId từ key
+      const tokenId = key.split(':')[2]; // lấy tokenId từ key
       const ttl = await redis.ttl(key);
       return { tokenId, createdAt: data.createdAt, expiresIn: ttl };
     }),
@@ -74,10 +75,32 @@ const getAllSessions = async (userId) => {
   return sessions;
 };
 
+const setTokenCookie = (res, refreshToken, accessToken) => {
+  // Cookie options
+  const accessTokenOptions = {
+    httpOnly: false, // Cho phép JS truy cập để frontend sử dụng
+    secure: process.env.NODE_ENV === 'production', // chỉ gửi trên HTTPS
+    sameSite: 'Strict', // chống CSRF
+    maxAge: ACCESS_TOKEN_TTL * 1000, // 30 phút (ms)
+  };
+
+  const refreshTokenOptions = {
+    httpOnly: false, // Cho phép JS truy cập để frontend sử dụng
+    secure: process.env.NODE_ENV === 'production', // chỉ gửi trên HTTPS
+    sameSite: 'Strict', // chống CSRF
+    maxAge: TTL * 1000, // 7 ngày (ms)
+  };
+
+  // Set cookie
+  res.cookie('refreshToken', refreshToken, refreshTokenOptions);
+  res.cookie('accessToken', accessToken, accessTokenOptions);
+};
+
 module.exports = {
   saveRefreshToken,
   getRefreshToken,
   deleteRefreshToken,
   deleteAllRefreshTokens,
   getAllSessions,
+  setTokenCookie,
 };

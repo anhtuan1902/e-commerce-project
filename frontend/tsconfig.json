@@ -6,6 +6,7 @@
     "moduleResolution": "Node",
     "strict": true,
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "paths": { "@/*": ["src/*"] },
+    "allowSyntheticDefaultImports": true
   }
 }

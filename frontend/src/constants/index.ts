@@ -18,6 +18,13 @@ export const API_ROUTES = {
     VENDORS: '/vendors',
 } as const;
 
+export const ROUTES = {
+    HOME: '/',
+    LOGIN: '/login',
+    REGISTER: '/register',
+    CALLBACK_GOOGLE: '/auth/callback',
+}
+
 export const THEMES = {
     LIGHT: 'light',
     DARK: 'dark',

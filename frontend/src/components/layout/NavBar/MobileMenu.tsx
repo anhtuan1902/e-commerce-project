@@ -1,24 +1,17 @@
-interface NavItem {
-  label: string;
-  onClick?: () => void;
-}
-
 interface MobileMenuProps {
   isOpen: boolean;
-  marketplace?: NavItem;
-  vendor?: NavItem;
   onLoginClick?: () => void;
   onSignUpClick?: () => void;
   onMenuItemClick?: () => void;
+  onLogout?: () => void;
 }
 
 const MobileMenu = ({
   isOpen,
-  marketplace,
-  vendor,
   onLoginClick,
   onSignUpClick,
   onMenuItemClick,
+  onLogout,
 }: MobileMenuProps) => {
   if (!isOpen) return null;
 
@@ -31,22 +24,16 @@ const MobileMenu = ({
     <div className='md:hidden border-t border-gray-200 pb-3 pt-2'>
       {/* Mobile Navigation Items */}
       <button
-        onClick={() =>
-          handleMenuItemClick(
-            marketplace?.onClick || (() => console.log('Navigate to marketplace')),
-          )
-        }
+        onClick={() => handleMenuItemClick(() => console.log('Navigate to marketplace'))}
         className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
       >
-        {marketplace?.label || 'Chợ điện tử'}
+        {'Chợ điện tử'}
       </button>
       <button
-        onClick={() =>
-          handleMenuItemClick(vendor?.onClick || (() => console.log('Navigate to vendor panel')))
-        }
+        onClick={() => handleMenuItemClick(() => console.log('Navigate to vendor panel'))}
         className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
       >
-        {vendor?.label || 'Kênh Người Bán'}
+        {'Kênh Người Bán'}
       </button>
 
       {/* Mobile Auth Buttons */}

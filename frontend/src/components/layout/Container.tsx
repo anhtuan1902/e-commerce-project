@@ -4,6 +4,7 @@ import NavBar from './NavBar';
 
 const Container = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+
   const onLoginClick = () => {
     navigate('/login');
   };

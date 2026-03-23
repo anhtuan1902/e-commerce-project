@@ -1,6 +1,6 @@
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("../models/User");
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const User = require('../models/User');
 
 passport.use(
   new GoogleStrategy(
@@ -28,13 +28,13 @@ passport.use(
               googleId,
               avatar,
               isVerified: true,
-              role: "customer",
+              role: 'customer',
             });
           }
         }
 
         if (!user.isActive) {
-          return done(null, false, { message: "Tài khoản đã bị khóa" });
+          return done(null, false, { message: 'Tài khoản đã bị khóa' });
         }
 
         return done(null, user);

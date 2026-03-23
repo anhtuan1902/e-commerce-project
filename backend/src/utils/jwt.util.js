@@ -1,7 +1,8 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
-const ACCESS_TOKEN_EXPIRES = "30m"; // Access token hết hạn sau 30 phút
-const REFRESH_TOKEN_EXPIRES = "7d"; // Refresh token hết hạn sau 7 ngày
+const ACCESS_TOKEN_EXPIRES = '30m'; // Access token hết hạn sau 30 phút
+const REFRESH_TOKEN_EXPIRES = '7d'; // Refresh token hết hạn sau 7 ngày
 
 // ── Tạo Access Token (ngắn hạn) ───────────────────────────
 const generateAccessToken = (payload) => {

@@ -1,27 +1,19 @@
-import { ShoppingCart } from 'lucide-react';
-
-interface NavItem {
-  label: string;
-  onClick?: () => void;
-}
+import { useAppDispatch, useAppSelector } from '@/hooks';
+import { logoutThunk } from '@/store/slices/authSlice';
+import { Avatar, Dropdown, Space } from 'antd';
+import { LogOut, ShoppingCart, User } from 'lucide-react';
 
 interface DesktopMenuProps {
-  marketplace?: NavItem;
-  vendor?: NavItem;
-  cartCount?: number;
   onCartClick?: () => void;
   onLoginClick?: () => void;
   onSignUpClick?: () => void;
 }
 
-const DesktopMenu = ({
-  marketplace,
-  vendor,
-  cartCount = 2,
-  onCartClick,
-  onLoginClick,
-  onSignUpClick,
-}: DesktopMenuProps) => {
+const DesktopMenu = ({ onCartClick, onLoginClick, onSignUpClick }: DesktopMenuProps) => {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector((state) => state.auth.user);
+
   const handleLoginClick = () => {
     if (onLoginClick) {
       onLoginClick();
@@ -29,43 +21,92 @@ const DesktopMenu = ({
       console.log('Navigate to login');
     }
   };
+
+  const ItemUser = [
+    {
+      key: 'profile',
+      label: 'Tài khoản của tôi',
+      icon: <User className='mr-2' size={16} />,
+      onClick: () => console.log('Navigate to profile'),
+    },
+    {
+      key: 'orders',
+      label: 'Đơn hàng',
+      icon: <ShoppingCart className='mr-2' size={16} />,
+      onClick: () => console.log('Navigate to orders'),
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      label: 'Đăng xuất',
+      icon: <LogOut className='mr-2' size={16} />,
+      onClick: () => {
+        dispatch(logoutThunk()).unwrap();
+      },
+    },
+  ];
+
   return (
     <div className='hidden md:flex items-center space-x-4 lg:space-x-6'>
       <button
-        onClick={marketplace?.onClick || (() => console.log('Navigate to marketplace'))}
-        className='text-xs lg:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
+        onClick={() => console.log('Navigate to marketplace')}
+        className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
       >
-        {marketplace?.label || 'Chợ điện tử'}
+        Chợ điện tử
       </button>
       <button
-        onClick={vendor?.onClick || (() => console.log('Navigate to vendor panel'))}
-        className='text-xs lg:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
+        onClick={() => console.log('Navigate to vendor panel')}
+        className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
       >
-        {vendor?.label || 'Kênh Người Bán'}
+        Kênh Người Bán
       </button>
       <div
         className='relative cursor-pointer'
         onClick={onCartClick || (() => console.log('Navigate to checkout'))}
       >
         <ShoppingCart className='h-5 lg:h-6 w-5 lg:w-6 text-gray-600 dark:text-gray-400 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors' />
-        <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
-          {cartCount}
+        <span className='absolute -top-2 cursor-pointer -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+          2
         </span>
       </div>
-      <div className='flex items-center space-x-2 lg:space-x-3 border-l pl-4 lg:pl-6 border-gray-200 dark:border-gray-700'>
-        <button
-          onClick={handleLoginClick}
-          className='text-xs lg:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
-        >
-          Đăng nhập
-        </button>
-        <button
-          onClick={onSignUpClick || (() => console.log('Navigate to register'))}
-          className='text-xs lg:text-sm font-medium bg-[#1E3A8A] dark:bg-indigo-500 text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-[#1E3A8A] transition-colors'
-        >
-          Đăng ký
-        </button>
-      </div>
+      <div className='w-px h-8 bg-gray-200'></div>
+      {isAuthenticated ? (
+        <>
+          <Dropdown
+            menu={{
+              items: ItemUser as [],
+            }}
+          >
+            <a onClick={(e) => e.preventDefault()}>
+              <Space>
+                <Avatar
+                  src={<img src={user?.avatar} referrerPolicy='no-referrer' alt={user?.name} />}
+                />
+                <span className='hidden lg:inline-block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                  {user?.name}
+                </span>
+              </Space>
+            </a>
+          </Dropdown>
+        </>
+      ) : (
+        <div className='flex items-center space-x-2 lg:space-x-3'>
+          <button
+            onClick={handleLoginClick}
+            className='text-xs lg:text-sm cursor-pointer font-medium text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
+          >
+            Đăng nhập
+          </button>
+          <button
+            onClick={onSignUpClick || (() => console.log('Navigate to register'))}
+            className='text-xs lg:text-sm cursor-pointer font-medium bg-[#1E3A8A] dark:bg-indigo-500 text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-[#1E3A8A] transition-colors'
+          >
+            Đăng ký
+          </button>
+        </div>
+      )}
     </div>
   );
 };

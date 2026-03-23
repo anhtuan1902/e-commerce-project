@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
 class JwtService {
@@ -13,28 +14,28 @@ class JwtService {
 
     // Save token to cookie with expiry matching JWT
     setToken(token: string) {
-        cookieStore.set("token", token);
+        Cookies.set("accessToken", token);
     }
 
     // Save refresh token to cookie
     setRefreshToken(refreshToken: string) {
-        cookieStore.set("refreshToken", refreshToken);
+        Cookies.set("refreshToken", refreshToken);
     }
 
     // Get token from cookie
     getToken() {
-        return cookieStore.get("token");
+        return Cookies.get("accessToken");
     }
 
     // Get refresh token from cookie
     getRefreshToken() {
-        return cookieStore.get("refreshToken");
+        return Cookies.get("refreshToken");
     }
 
     // Remove token and refresh token
     removeTokens() {
-        cookieStore.delete("token");
-        cookieStore.delete("refreshToken");
+        Cookies.remove("accessToken");
+        Cookies.remove("refreshToken");
     }
 
     // Check if token is valid

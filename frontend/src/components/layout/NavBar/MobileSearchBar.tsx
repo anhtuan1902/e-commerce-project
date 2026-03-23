@@ -3,14 +3,12 @@ import { RefObject } from 'react';
 
 interface MobileSearchBarProps {
   isOpen: boolean;
-  searchInputRef: RefObject<HTMLInputElement>;
   placeholder?: string;
   onSearch?: (value: string) => void;
 }
 
 const MobileSearchBar = ({
   isOpen,
-  searchInputRef,
   placeholder = 'Tìm kiếm...',
   onSearch,
 }: MobileSearchBarProps) => {
@@ -20,7 +18,6 @@ const MobileSearchBar = ({
     <div className='sm:hidden border-t bg-white border-gray-200 px-2 py-2'>
       <div className='relative w-full'>
         <input
-          ref={searchInputRef}
           type='text'
           placeholder={placeholder}
           onChange={(e) => onSearch?.(e.target.value)}

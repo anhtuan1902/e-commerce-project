@@ -1,4 +1,4 @@
-import { Heart, Mail, Store } from 'lucide-react';
+import { Heart, Mail, PhoneCall } from 'lucide-react';
 import Logo from '../ui/Logo';
 
 const Footer = () => {
@@ -59,9 +59,11 @@ const Footer = () => {
             <h3 className='text-white dark:text-gray-100 font-semibold mb-4'>Liên hệ</h3>
             <ul className='space-y-2 text-sm'>
               <li className='flex items-center'>
-                <Mail className='h-4 w-4 mr-2' /> support@multimarket.vn
+                <Mail className='h-4 w-4 mr-2' /> Email: trantuan1902.tt@gmail.com
               </li>
-              <li>Hotline: 1900 1000</li>
+              <li className='flex items-center'>
+                <PhoneCall className='h-4 w-4 mr-2' /> Hotline: 0377763440
+              </li>
             </ul>
           </div>
         </div>

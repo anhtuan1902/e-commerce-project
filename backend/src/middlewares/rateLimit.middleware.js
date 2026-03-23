@@ -1,6 +1,6 @@
 // src/middlewares/rateLimit.middleware.js
-const redis = require("../config/redis");
-const { errorResponse } = require("../utils/response.util");
+const redis = require('../config/redis');
+const { errorResponse } = require('../utils/response.util');
 
 const loginRateLimit = async (req, res, next) => {
   const ip = req.ip;
@@ -17,11 +17,7 @@ const loginRateLimit = async (req, res, next) => {
 
   if (current > MAX) {
     const ttl = await redis.ttl(key);
-    return errorResponse(
-      res,
-      `Quá nhiều lần thử. Vui lòng đợi ${ttl} giây`,
-      429,
-    );
+    return errorResponse(res, `Quá nhiều lần thử. Vui lòng đợi ${ttl} giây`, 429);
   }
 
   next();

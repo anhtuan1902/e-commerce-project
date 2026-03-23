@@ -1,6 +1,8 @@
-const express = require("express");
-const passport = require("passport");
-const router = express.Router();
+const express = require('express');
+const passport = require('passport');
+
+const publicRouter = express.Router();
+const protectedRouter = express.Router();
 
 const {
   register,
@@ -11,9 +13,9 @@ const {
   logoutAll,
   getSessions,
   getMe,
-} = require("../controllers/auth.controller");
-const { authenticate } = require("../middlewares/auth.middleware");
-const { loginRateLimit } = require("../middlewares/rateLimit.middleware");
+} = require('../controllers/auth.controller');
+const { authenticate } = require('../middlewares/auth.middleware');
+const { loginRateLimit } = require('../middlewares/rateLimit.middleware');
 
 // Đăng ký / đăng nhập thường
 /**
@@ -66,7 +68,7 @@ const { loginRateLimit } = require("../middlewares/rateLimit.middleware");
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-router.post("/register", register);
+publicRouter.post('/register', register);
 
 /**
  * @openapi
@@ -92,7 +94,7 @@ router.post("/register", register);
  *       401:
  *         description: Email hoặc mật khẩu không đúng
  */
-router.post("/login", loginRateLimit, login);
+publicRouter.post('/login', loginRateLimit, login);
 
 /**
  * @openapi
@@ -116,7 +118,7 @@ router.post("/login", loginRateLimit, login);
  *       401:
  *         description: Refresh token không hợp lệ
  */
-router.post("/refresh-token", refreshToken);
+publicRouter.post('/refresh-token', refreshToken);
 
 // Bước 1: Redirect sang Google
 /**
@@ -132,10 +134,10 @@ router.post("/refresh-token", refreshToken);
  *       401:
  *         description: Chưa xác thực
  */
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
+publicRouter.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
     session: false,
   }),
 );
@@ -152,21 +154,33 @@ router.get(
  *       302:
  *         description: Google redirect về đây sau khi user đồng ý
  */
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
+publicRouter.get(
+  '/google/callback',
+  passport.authenticate('google', {
     session: false,
-    failureRedirect: "/api/auth/google/error",
+    failureRedirect: '/api/auth/google/error',
   }),
   googleCallback,
 );
 
 // Protected
+protectedRouter.use(authenticate);
+
 /**
  * @openapi
  * /api/auth/logout:
  *   post:
  *     summary: Đăng xuất
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 required: true
  *     tags:
  *       - Auth
  *     responses:
@@ -175,7 +189,7 @@ router.get(
  *       401:
  *         description: Chưa xác thực
  */
-router.post("/logout", authenticate, logout);
+protectedRouter.post('/logout', logout);
 
 /**
  * @openapi
@@ -190,7 +204,7 @@ router.post("/logout", authenticate, logout);
  *       401:
  *         description: Chưa xác thực
  */
-router.post("/logout-all", authenticate, logoutAll);
+protectedRouter.post('/logout-all', logoutAll);
 
 /**
  * @openapi
@@ -205,7 +219,7 @@ router.post("/logout-all", authenticate, logoutAll);
  *       401:
  *         description: Chưa xác thực
  */
-router.get("/sessions", authenticate, getSessions);
+protectedRouter.get('/sessions', getSessions);
 
 /**
  * @openapi
@@ -220,6 +234,9 @@ router.get("/sessions", authenticate, getSessions);
  *       401:
  *         description: Chưa xác thực
  */
-router.get("/me", authenticate, getMe);
+protectedRouter.get('/me', getMe);
 
-module.exports = router;
+module.exports = {
+  publicRouter,
+  protectedRouter,
+};

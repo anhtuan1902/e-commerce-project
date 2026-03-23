@@ -1,6 +1,8 @@
 import AuthService from '@/features/home/services/auth.service';
+import { jwtService } from '@/services/jwt.services';
 import { AuthState, LoginRequest, RegisterRequest, User } from '@/types/auth.types';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 // ── Async Thunks ──────────────────────────────────────
 
@@ -9,9 +11,6 @@ export const loginThunk = createAsyncThunk(
     async (data: LoginRequest, { rejectWithValue }) => {
         try {
             const result = await AuthService.login(data);
-            // Lưu refreshToken vào cookie
-            sessionStorage.setItem('refreshToken', result.refreshToken);
-            sessionStorage.setItem('accessToken', result.accessToken);
             return result;
         } catch (err: any) {
             return rejectWithValue(err.response?.data?.message || 'Đăng nhập thất bại');
@@ -24,7 +23,6 @@ export const registerThunk = createAsyncThunk(
     async (data: RegisterRequest, { rejectWithValue }) => {
         try {
             const result = await AuthService.register(data);
-            localStorage.setItem('refreshToken', result.refreshToken);
             return result;
         } catch (err: any) {
             return rejectWithValue(err.response?.data?.message || 'Đăng ký thất bại');
@@ -36,13 +34,15 @@ export const logoutThunk = createAsyncThunk(
     'auth/logout',
     async (_, { rejectWithValue }) => {
         try {
-            const refreshToken = sessionStorage.getItem('refreshToken') || '';
-            await AuthService.logout(refreshToken);
-        } catch {
-            // Dù lỗi vẫn logout ở client
-        } finally {
-            sessionStorage.removeItem('refreshToken');
-            sessionStorage.removeItem('accessToken');
+            const refreshToken = Cookies.get('refreshToken');
+
+            if (refreshToken) {
+                await AuthService.logout(refreshToken);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            return rejectWithValue(error);
         }
     }
 );
@@ -61,11 +61,10 @@ export const getMeThunk = createAsyncThunk(
 
 // ── Initial State ─────────────────────────────────────
 const initialState: AuthState = {
-    user: null,
-    accessToken: localStorage.getItem('accessToken'),
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
     isLoading: false,
     error: null,
-    isAuthenticated: !!localStorage.getItem('accessToken'),
+    isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
 };
 
 // ── Slice ─────────────────────────────────────────────
@@ -76,10 +75,8 @@ const authSlice = createSlice({
         // Dùng khi Google OAuth callback trả về token qua URL
         setCredentials: (state, action: PayloadAction<{ user: User; accessToken: string }>) => {
             state.user = action.payload.user;
-            state.accessToken = action.payload.accessToken;
             state.isAuthenticated = true;
             state.error = null;
-            localStorage.setItem('accessToken', action.payload.accessToken);
         },
         clearError: (state) => {
             state.error = null;
@@ -95,13 +92,15 @@ const authSlice = createSlice({
             .addCase(loginThunk.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.user = action.payload.user;
-                state.accessToken = action.payload.accessToken;
                 state.isAuthenticated = true;
-                localStorage.setItem('accessToken', action.payload.accessToken);
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
             })
             .addCase(loginThunk.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+                state.isAuthenticated = false;
+                localStorage.removeItem('isAuthenticated');
             });
 
         // ── Register ────────────────────────────────────
@@ -113,9 +112,9 @@ const authSlice = createSlice({
             .addCase(registerThunk.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.user = action.payload.user;
-                state.accessToken = action.payload.accessToken;
                 state.isAuthenticated = true;
-                localStorage.setItem('accessToken', action.payload.accessToken);
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
+                localStorage.setItem('isAuthenticated', 'true');
             })
             .addCase(registerThunk.rejected, (state, action) => {
                 state.isLoading = false;
@@ -125,26 +124,36 @@ const authSlice = createSlice({
         // ── Logout ──────────────────────────────────────
         builder.addCase(logoutThunk.fulfilled, (state) => {
             state.user = null;
-            state.accessToken = null;
             state.isAuthenticated = false;
             state.error = null;
+            jwtService.removeTokens();
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('user');
         });
 
         // ── Get Me ──────────────────────────────────────
         builder
+            .addCase(getMeThunk.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
             .addCase(getMeThunk.fulfilled, (state, action) => {
                 state.user = action.payload;
+                state.isLoading = false;
                 state.isAuthenticated = true;
+                localStorage.setItem('user', JSON.stringify(action.payload));
+                localStorage.setItem('isAuthenticated', 'true');
+
             })
             .addCase(getMeThunk.rejected, (state) => {
                 state.user = null;
-                state.accessToken = null;
+                state.isLoading = false;
                 state.isAuthenticated = false;
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('user');
             });
     },
 });
 
 export const { setCredentials, clearError } = authSlice.actions;
-export default authSlice.reducer;
+export default authSlice.reducer; 

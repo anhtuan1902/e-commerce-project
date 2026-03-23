@@ -16,7 +16,7 @@ export default defineConfig([
     extends: [js.configs.recommended],
     rules: {
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
       semi: ['error', 'always'],
       quotes: ['error', 'single', { avoidEscape: true }],
       indent: ['error', 2],

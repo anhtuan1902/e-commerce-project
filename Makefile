@@ -29,6 +29,8 @@ prod-up:
 clean:
 	docker compose down -v
 	docker image prune -f
+	docker system prune -a --volumes -f
+
 
 # DEV hàng ngày:
 #   make dev → docker-compose up

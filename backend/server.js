@@ -1,22 +1,18 @@
-const app = require("./app");
-const sequelize = require("./src/config/database");
+const app = require('./src/app');
 
 const PORT = process.env.PORT || 5000;
 
-async function startServer() {
-  try {
-    await sequelize.authenticate();
-    console.log("✅ Kết nối MySQL thành công!");
+const server = app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+});
 
-    await sequelize.sync({ alter: true }); // Tự tạo bảng theo models
-    console.log("✅ Database đã sync!");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("❌ Lỗi kết nối:", error);
-  }
-}
-
-startServer();
+process.on('SIGINT', () => {
+  // eslint-disable-next-line no-console
+  console.log('🔌 Đang tắt server...');
+  server.close(() => {
+    // eslint-disable-next-line no-console
+    console.log('🔌 Server đã tắt.');
+    process.exit(0);
+  });
+});

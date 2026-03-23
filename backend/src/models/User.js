@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 const User = sequelize.define(
   'User',
@@ -118,7 +118,8 @@ User.prototype.comparePassword = async function (plainPassword) {
 
 // Trả object không có thông tin nhạy cảm
 User.prototype.toSafeObject = function () {
-  const { password, refreshToken, googleId, ...safe } = this.toJSON();
+  /* eslint-disable no-unused-vars */
+  const { password, refreshToken, googleId, ...safe } = this.toJSON(); // loại bỏ các trường nhạy cảm
   return safe;
 };
 
