@@ -1,4 +1,4 @@
-# NXT WAVB™ - Multi-Vendor eCommerce Marketplace
+# Multi-Vendor eCommerce Marketplace
 
 A modern, scalable multi-vendor marketplace platform that enables multiple sellers to manage and sell their products on a single unified platform. Built with Node.js and MySQL, featuring comprehensive vendor management, product catalogs, order fulfillment, and payment gateway integration.
 
