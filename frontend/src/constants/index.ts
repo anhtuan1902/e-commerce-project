@@ -23,6 +23,7 @@ export const ROUTES = {
     LOGIN: '/login',
     REGISTER: '/register',
     CALLBACK_GOOGLE: '/auth/callback',
+    PROFILE: '/profile',
 }
 
 export const THEMES = {

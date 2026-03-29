@@ -34,6 +34,8 @@ class JwtService {
 
     // Remove token and refresh token
     removeTokens() {
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("user");
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
     }

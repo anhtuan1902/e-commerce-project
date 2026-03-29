@@ -1,7 +1,9 @@
 import { useAppDispatch, useAppSelector } from '@/hooks';
+import useCheckRole from '@/hooks/useCheckRole';
 import { logoutThunk } from '@/store/slices/authSlice';
 import { Avatar, Dropdown, Space } from 'antd';
 import { LogOut, ShoppingCart, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface DesktopMenuProps {
   onCartClick?: () => void;
@@ -13,6 +15,9 @@ const DesktopMenu = ({ onCartClick, onLoginClick, onSignUpClick }: DesktopMenuPr
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const user = useAppSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+
+  const isVendor = useCheckRole({ role: 'vendor' });
 
   const handleLoginClick = () => {
     if (onLoginClick) {
@@ -27,7 +32,7 @@ const DesktopMenu = ({ onCartClick, onLoginClick, onSignUpClick }: DesktopMenuPr
       key: 'profile',
       label: 'Tài khoản của tôi',
       icon: <User className='mr-2' size={16} />,
-      onClick: () => console.log('Navigate to profile'),
+      onClick: () => navigate('/profile'),
     },
     {
       key: 'orders',
@@ -50,18 +55,23 @@ const DesktopMenu = ({ onCartClick, onLoginClick, onSignUpClick }: DesktopMenuPr
 
   return (
     <div className='hidden md:flex items-center space-x-4 lg:space-x-6'>
-      <button
-        onClick={() => console.log('Navigate to marketplace')}
-        className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
-      >
-        Chợ điện tử
-      </button>
-      <button
-        onClick={() => console.log('Navigate to vendor panel')}
-        className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
-      >
-        Kênh Người Bán
-      </button>
+      {isVendor && (
+        <>
+          <button
+            onClick={() => console.log('Navigate to marketplace')}
+            className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
+          >
+            Chợ điện tử
+          </button>
+          <button
+            onClick={() => console.log('Navigate to vendor panel')}
+            className='text-xs lg:text-sm font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-[#1E3A8A] dark:hover:text-indigo-400 transition-colors'
+          >
+            Kênh Người Bán
+          </button>
+        </>
+      )}
+
       <div
         className='relative cursor-pointer'
         onClick={onCartClick || (() => console.log('Navigate to checkout'))}

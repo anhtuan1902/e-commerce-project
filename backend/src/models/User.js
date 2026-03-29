@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
-const { sequelize } = require('../config/database');
+const sequelize = require('../database/sequelize');
 
 const User = sequelize.define(
   'User',
@@ -54,11 +54,6 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
       unique: { msg: 'Số điện thoại đã tồn tại' },
-    },
-
-    address: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
 
     // Trạng thái tài khoản
@@ -121,6 +116,21 @@ User.prototype.toSafeObject = function () {
   /* eslint-disable no-unused-vars */
   const { password, refreshToken, googleId, ...safe } = this.toJSON(); // loại bỏ các trường nhạy cảm
   return safe;
+};
+
+User.associate = (models) => {
+  User.hasOne(models.UserProfile, { foreignKey: 'user_id', as: 'profile' });
+  User.hasMany(models.Address, { foreignKey: 'user_id', as: 'addresses' });
+  User.hasOne(models.LoyaltyWallet, { foreignKey: 'user_id', as: 'wallet' });
+  User.hasMany(models.LoyaltyTransaction, { foreignKey: 'user_id', as: 'loyaltyTransactions' });
+  User.hasOne(models.Vendor, { foreignKey: 'user_id', as: 'vendor' });
+  User.hasMany(models.Order, { foreignKey: 'user_id', as: 'orders' });
+  User.hasMany(models.Rating, { foreignKey: 'user_id', as: 'ratings' });
+  User.hasMany(models.Comment, { foreignKey: 'user_id', as: 'comments' });
+  User.hasMany(models.Wishlist, { foreignKey: 'user_id', as: 'wishlists' });
+  User.hasMany(models.Booking, { foreignKey: 'user_id', as: 'bookings' });
+  User.hasMany(models.Message, { foreignKey: 'sender_id', as: 'sentMessages' });
+  User.hasMany(models.Conversation, { foreignKey: 'user_id', as: 'conversations' });
 };
 
 module.exports = User;

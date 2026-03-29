@@ -13,7 +13,7 @@ const {
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
-const { connectDB } = require('./config/database');
+const { connectDB } = require('./database');
 
 const app = express();
 

@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("users", {
+    await queryInterface.createTable('users', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -28,8 +28,8 @@ module.exports = {
       },
 
       role: {
-        type: Sequelize.ENUM("admin", "vendor", "customer"),
-        defaultValue: "customer",
+        type: Sequelize.ENUM('admin', 'vendor', 'customer'),
+        defaultValue: 'customer',
         allowNull: false,
       },
 
@@ -47,11 +47,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
         unique: true,
-      },
-
-      address: {
-        type: Sequelize.STRING,
-        allowNull: true,
       },
 
       isVerified: {
@@ -79,24 +74,23 @@ module.exports = {
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.fn("NOW"),
+        defaultValue: Sequelize.fn('NOW'),
       },
 
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.fn("NOW"),
+        defaultValue: Sequelize.fn('NOW'),
       },
     });
 
     // Index giúp query nhanh hơn
-    await queryInterface.addIndex("users", ["email"]);
-    await queryInterface.addIndex("users", ["role"]);
-    await queryInterface.addIndex("users", ["phone"]);
-    await queryInterface.addIndex("users", ["address"]);
+    await queryInterface.addIndex('users', ['email']);
+    await queryInterface.addIndex('users', ['role']);
+    await queryInterface.addIndex('users', ['phone']);
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("users");
+  async down(queryInterface) {
+    await queryInterface.dropTable('users');
   },
 };

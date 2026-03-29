@@ -7,12 +7,23 @@ import RegisterPage from '../features/home/pages/RegisterPage';
 import { ROUTES } from '@/constants';
 import { AuthCallbackPage } from '@/features/home/pages/AuthCallbackPage';
 import { withPublicRoute } from './PublicRoute';
+import Container from '@/components/layout/Container';
+import ProfilePage from '@/features/home/pages/ProfilePage';
 
 function AppRouter() {
   return (
     <Suspense fallback={<SpinLoading />}>
       <Routes>
-        <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route
+          element={<Container />}
+          children={
+            <>
+              <Route path={ROUTES.HOME} element={<HomePage />} />
+              <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+              {/* Các route khác có layout chung (Container) sẽ được thêm ở đây */}
+            </>
+          }
+        />
         <Route path={ROUTES.LOGIN} element={withPublicRoute(<LoginPage />)} />
         <Route path={ROUTES.REGISTER} element={withPublicRoute(<RegisterPage />)} />
         <Route path={ROUTES.CALLBACK_GOOGLE} element={<AuthCallbackPage />} />

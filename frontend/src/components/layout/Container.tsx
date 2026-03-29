@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 import NavBar from './NavBar';
 
-const Container = ({ children }: { children: React.ReactNode }) => {
+const Container = () => {
   const navigate = useNavigate();
 
   const onLoginClick = () => {
@@ -19,7 +19,9 @@ const Container = ({ children }: { children: React.ReactNode }) => {
       <NavBar onLoginClick={onLoginClick} onSignUpClick={onSignUpClick} />
 
       {/* Main Content Area */}
-      <main className='flex-row text-gray-900 dark:text-gray-50'>{children}</main>
+      <main className='flex-row text-gray-900 dark:text-gray-50 m-8'>
+        <Outlet />
+      </main>
 
       {/* Footer */}
       {/* Ẩn Footer ở trang Vendor Dashboard vì nó có layout riêng (Sidebar + Content full màn) */}

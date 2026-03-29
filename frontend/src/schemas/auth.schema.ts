@@ -25,3 +25,21 @@ export const RegisterVendorRequestSchema = z.object({
     message: "Passwords don't match",
     path: ["confirm_password"],
 });
+
+export const InfoAccountSchema = z.object({
+    name: z.string().min(2).max(100),
+    email: z.string().email(),
+    phone_number: z
+        .string()
+        .min(10, "Phone phải >= 10 số")
+        .max(11, "Phone <= 11 số")
+        .nullable()
+        .or(z.literal("")),
+
+    address: z
+        .string()
+        .min(5, "Address >= 5 ký tự")
+        .max(255)
+        .nullable()
+        .or(z.literal("")),
+})
