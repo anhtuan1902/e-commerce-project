@@ -15,15 +15,13 @@ const generateAccessToken = (payload) => {
 // tokenId: mã định danh duy nhất cho mỗi phiên đăng nhập
 // Dùng để lưu/xóa chính xác token trong Redis
 const generateRefreshToken = (payload) => {
-  const tokenId = uuidv4(); // ví dụ: "550e8400-e29b-41d4-a716-446655440000"
+  const tokenId = uuidv4();
 
-  const token = jwt.sign(
-    { ...payload, tokenId }, // nhúng tokenId vào trong token
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRES },
-  );
+  const refreshToken = jwt.sign({ ...payload, tokenId }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES,
+  });
 
-  return { token, tokenId };
+  return { refreshToken, tokenId };
 };
 
 // ── Tạo cặp Access + Refresh Token ───────────────────────
@@ -31,7 +29,7 @@ const generateTokenPair = (user) => {
   const payload = { id: user.id, email: user.email, role: user.role };
 
   const accessToken = generateAccessToken(payload);
-  const { token: refreshToken, tokenId } = generateRefreshToken(payload);
+  const { refreshToken, tokenId } = generateRefreshToken(payload);
 
   return { accessToken, refreshToken, tokenId };
 };

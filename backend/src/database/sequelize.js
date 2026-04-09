@@ -8,7 +8,6 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
   define: {
     underscored: false,
     timestamps: true,
-    paranoid: true, // soft delete: thêm deletedAt vào tất cả models
   },
 });
 

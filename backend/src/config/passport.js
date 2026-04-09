@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
+const UserProfile = require('../models/UserProfile');
 
 passport.use(
   new GoogleStrategy(
@@ -20,17 +21,34 @@ passport.use(
         if (!user) {
           user = await User.findOne({ where: { email } });
           if (user) {
-            await user.update({ googleId, avatar });
+            await user.update({ googleId });
+            // Update or create profile with avatar
+            await UserProfile.upsert({
+              user_id: user.id,
+              name,
+              avatar,
+            });
           } else {
             user = await User.create({
-              name,
               email,
               googleId,
-              avatar,
               isVerified: true,
               role: 'customer',
             });
+            // Create profile with avatar
+            await UserProfile.create({
+              user_id: user.id,
+              name,
+              avatar,
+            });
           }
+        } else {
+          // Ensure profile exists with avatar
+          await UserProfile.upsert({
+            user_id: user.id,
+            name,
+            avatar,
+          });
         }
 
         if (!user.isActive) {

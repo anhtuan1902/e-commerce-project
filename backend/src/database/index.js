@@ -29,6 +29,10 @@ const loadModels = () => {
   modelFiles.forEach((file) => {
     const model = require(path.join(modelsPath, file));
     const modelName = file.replace('.js', '');
+    // Initialize class-based models that are not yet initialized
+    if (model.init && !model.sequelize) {
+      model.init(sequelize);
+    }
     models[modelName] = model;
   });
 

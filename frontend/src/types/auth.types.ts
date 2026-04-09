@@ -1,17 +1,25 @@
 export type UserRole = 'admin' | 'vendor' | 'customer';
 
+export interface Profile {
+    name: string;
+    avatar: string;
+    avatarUrl?: string;
+    phone?: string;
+    birthday?: string;
+    gender?: string;
+}
+
 export interface User {
     id: number;
-    name: string;
     email: string;
     role: UserRole;
-    avatar?: string;
-    phone?: string;
-    address?: string;
     is_verified: boolean;
     last_login_at: Date;
+    no_password: boolean;
     created_at: Date;
     updated_at: Date;
+    profile?: Profile;
+    address?: object[];
 }
 
 export interface AuthState {
@@ -31,6 +39,7 @@ export interface RegisterRequest {
     name: string;
     email: string;
     password: string;
+    confirm_password: string;
     store_name?: string; // Chỉ dành cho vendor
     role?: 'customer' | 'vendor';
 }

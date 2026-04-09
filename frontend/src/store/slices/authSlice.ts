@@ -11,6 +11,8 @@ export const loginThunk = createAsyncThunk(
     async (data: LoginRequest, { rejectWithValue }) => {
         try {
             const result = await AuthService.login(data);
+            jwtService.setToken(result.accessToken);
+            jwtService.setRefreshToken(result.refreshToken);
             return result;
         } catch (err: any) {
             return rejectWithValue(err.response?.data?.message || 'Đăng nhập thất bại');
@@ -23,6 +25,8 @@ export const registerThunk = createAsyncThunk(
     async (data: RegisterRequest, { rejectWithValue }) => {
         try {
             const result = await AuthService.register(data);
+            jwtService.setToken(result.accessToken);
+            jwtService.setRefreshToken(result.refreshToken);
             return result;
         } catch (err: any) {
             return rejectWithValue(err.response?.data?.message || 'Đăng ký thất bại');

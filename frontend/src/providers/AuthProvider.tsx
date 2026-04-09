@@ -2,6 +2,7 @@ import SpinLoading from '@/components/ui/SpinLoading';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { getMeThunk } from '@/store/slices/authSlice';
 import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -18,5 +19,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return <SpinLoading />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <Toaster position='top-center' />
+    </>
+  );
 }

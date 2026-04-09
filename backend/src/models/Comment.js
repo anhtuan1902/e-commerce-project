@@ -66,6 +66,7 @@ const Comment = sequelize.define(
   {
     tableName: 'comments',
     timestamps: true,
+    paranoid: true, // soft delete
     indexes: [
       { fields: ['user_id'] },
       { fields: ['product_id'] },

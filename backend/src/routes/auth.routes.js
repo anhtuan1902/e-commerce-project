@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const upload = require('../middlewares/upload.middleware');
 
 const publicRouter = express.Router();
 const protectedRouter = express.Router();
@@ -13,6 +14,7 @@ const {
   logoutAll,
   getSessions,
   getMe,
+  changePassword,
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { loginRateLimit } = require('../middlewares/rateLimit.middleware');
@@ -28,47 +30,44 @@ const { loginRateLimit } = require('../middlewares/rateLimit.middleware');
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
- *               role:
- *                 type: string
- *                 enum:
- *                   - customer
- *                   - vendor
- *                 default: customer
  *               email:
  *                 type: string
  *               password:
  *                 type: string
- *                 minLength: 8
- *                 maxLength: 100
- *                 required: true
- *                 format: password
+ *               phone:
+ *                 type: string
+ *                 nullable: true
  *               avatar:
  *                 type: string
  *                 format: binary
- *                 description: Avatar của user
- *               phone:
+ *                 nullable: true
+ *               birthday:
  *                 type: string
- *                 minLength: 10
- *                 maxLength: 15
- *                 format: phone
- *               address:
+ *                 format: date
+ *                 description: Ngày sinh (YYYY-MM-DD)
+ *               gender:
  *                 type: string
- *                 minLength: 10
- *                 maxLength: 100
- *                 format: address
+ *                 enum: [male, female, other]
+ *
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Đăng ký thành công
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-publicRouter.post('/register', register);
+publicRouter.post('/register', upload.single('avatar'), register);
 
 /**
  * @openapi
@@ -235,6 +234,39 @@ protectedRouter.get('/sessions', getSessions);
  *         description: Chưa xác thực
  */
 protectedRouter.get('/me', getMe);
+
+/**
+ * @openapi
+ * /api/auth/change-password:
+ *   put:
+ *     summary: Đổi mật khẩu
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 required: true
+ *               newPassword:
+ *                 type: string
+ *                 required: true
+ *               confirmPassword:
+ *                 type: string
+ *                 required: true
+ *     responses:
+ *       200:
+ *         description: Đổi mật khẩu thành công
+ *       400:
+ *         description: Mật khẩu hiện tại không đúng
+ *       401:
+ *         description: Chưa xác thực
+ */
+protectedRouter.put('/change-password', changePassword);
 
 module.exports = {
   publicRouter,

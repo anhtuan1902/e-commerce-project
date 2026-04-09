@@ -60,6 +60,7 @@ const Inventory = sequelize.define(
   {
     tableName: 'inventory',
     timestamps: true,
+    paranoid: true,
     indexes: [
       { unique: true, fields: ['product_id'] },
       { fields: ['quantity'] },

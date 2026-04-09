@@ -83,6 +83,7 @@ const OrderVendor = sequelize.define(
   {
     tableName: 'order_vendor',
     timestamps: true,
+    paranoid: true,
     indexes: [{ fields: ['order_id'] }, { fields: ['vendor_id'] }, { fields: ['status'] }],
   },
 );

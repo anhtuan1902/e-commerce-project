@@ -1,86 +1,68 @@
-const User = require('../models/User');
-const { generateTokenPair, verifyRefreshToken, generateAccessToken } = require('../utils/jwt.util');
 const { successResponse, errorResponse } = require('../utils/response.util');
-const tokenService = require('../services/token.services');
+const { validateBody } = require('../middlewares/validation.middleware');
+const {
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+  logoutSchema,
+  changePasswordSchema,
+} = require('../validations');
+const AppError = require('../utils/ApiError');
+const authService = require('../services/auth.service');
+const tokenService = require('../services/token.service');
+const User = require('../models/User');
 
 // ─────────────────────────────────────────────────────
 // ĐĂNG KÝ  —  POST /api/auth/register
 // ─────────────────────────────────────────────────────
-const register = async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+const register = [
+  validateBody(registerSchema),
+  async (req, res) => {
+    try {
+      const result = await authService.register(req.body);
+      if (result.role === 'vendor') {
+        return successResponse(
+          res,
+          {
+            user: result.user,
+          },
+          'Đăng ký thành công. Tài khoản của bạn đang chờ được duyệt bởi admin',
+          201,
+        );
+      }
 
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) return errorResponse(res, 'Email đã được sử dụng', 409);
-
-    const allowedRoles = ['customer', 'vendor'];
-    const userRole = allowedRoles.includes(role) ? role : 'customer';
-
-    const user = await User.create({ name, email, password, role: userRole });
-
-    // Tạo token pair (accessToken + refreshToken + tokenId)
-    const { accessToken, refreshToken, tokenId } = generateTokenPair(user);
-
-    // Lưu refreshToken vào Redis (không lưu vào MySQL nữa)
-    await tokenService.saveRefreshToken(user.id, tokenId, refreshToken);
-
-    // Cập nhật lastLoginAt trong MySQL
-    await User.update({ lastLoginAt: new Date() }, { where: { id: user.id } });
-
-    // Lưu accessToken và refreshToken vào cookie
-    tokenService.setTokenCookie(res, refreshToken, accessToken);
-
-    return successResponse(res, { user: user.toSafeObject() }, 'Đăng ký thành công', 201);
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      return errorResponse(
+      return successResponse(
         res,
-        'Dữ liệu không hợp lệ',
-        422,
-        error.errors.map((e) => e.message),
+        {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+        'Đăng ký thành công',
+        201,
       );
+    } catch (error) {
+      if (error instanceof AppError) return errorResponse(res, error.message, error.statusCode);
+      return errorResponse(res, 'Lỗi server');
     }
-    console.error('Register error:', error);
-    return errorResponse(res, 'Lỗi server');
-  }
-};
+  },
+];
 
 // ─────────────────────────────────────────────────────
 // ĐĂNG NHẬP  —  POST /api/auth/login
 // ─────────────────────────────────────────────────────
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) return errorResponse(res, 'Vui lòng nhập email và mật khẩu', 400);
-
-    const user = await User.scope('withPassword').findOne({ where: { email } });
-    if (!user) return errorResponse(res, 'Email hoặc mật khẩu không đúng', 401);
-    if (!user.isActive) return errorResponse(res, 'Tài khoản đã bị khóa', 403);
-    if (!user.password) return errorResponse(res, 'Tài khoản này đăng nhập bằng Google', 400);
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return errorResponse(res, 'Email hoặc mật khẩu không đúng', 401);
-
-    const { accessToken, refreshToken, tokenId } = generateTokenPair(user);
-
-    // Lưu vào Redis
-    await tokenService.saveRefreshToken(user.id, tokenId, refreshToken);
-    await User.update({ lastLoginAt: new Date() }, { where: { id: user.id } });
-
-    // Lưu refresh and access vào cookie và k cần trả
-    tokenService.setTokenCookie(res, refreshToken, accessToken);
-
-    return successResponse(
-      res,
-      {
-        user: user.toSafeObject(),
-      },
-      'Đăng nhập thành công',
-    );
-  } catch (error) {
-    return errorResponse(res, error);
-  }
-};
+const login = [
+  validateBody(loginSchema),
+  async (req, res) => {
+    try {
+      const result = await authService.login(req.body);
+      return successResponse(res, result, 'Đăng nhập thành công');
+    } catch (error) {
+      if (error instanceof AppError) return errorResponse(res, error.message, error.statusCode);
+      return errorResponse(res, 'Lỗi server', 500);
+    }
+  },
+];
 
 // ─────────────────────────────────────────────────────
 // GOOGLE CALLBACK  —  GET /api/auth/google/callback
@@ -88,18 +70,12 @@ const login = async (req, res) => {
 const googleCallback = async (req, res) => {
   try {
     const user = req.user;
-    const { accessToken, refreshToken, tokenId } = generateTokenPair(user);
-
-    // Lưu vào Redis
-    await tokenService.saveRefreshToken(user.id, tokenId, refreshToken);
-    await User.update({ lastLoginAt: new Date() }, { where: { id: user.id } });
-
+    const result = await authService.googleCallback(user);
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    // Lưu refresh and access vào cookie và k cần trả
-    tokenService.setTokenCookie(res, refreshToken, accessToken);
-
-    return res.redirect(`${frontendURL}/auth/callback`);
+    return res.redirect(
+      `${frontendURL}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`,
+    );
   } catch (error) {
     console.error('Google callback error:', error);
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -110,90 +86,37 @@ const googleCallback = async (req, res) => {
 // ─────────────────────────────────────────────────────
 // LÀM MỚI TOKEN  —  POST /api/auth/refresh-token
 // ─────────────────────────────────────────────────────
-const refreshToken = async (req, res) => {
-  try {
-    const { refreshToken: token } = req.body;
-    if (!token) return errorResponse(res, 'Thiếu refresh token', 400);
-
-    // Bước 1: Verify chữ ký JWT
-    let decoded;
+const refreshToken = [
+  validateBody(refreshTokenSchema),
+  async (req, res) => {
     try {
-      decoded = verifyRefreshToken(token);
-    } catch (err) {
-      if (err.name === 'TokenExpiredError') {
-        return errorResponse(res, 'Phiên đăng nhập hết hạn, vui lòng đăng nhập lại', 401);
-      }
-      return errorResponse(res, 'Token không hợp lệ', 401);
+      const result = await authService.refreshToken(req.body.refreshToken);
+      return successResponse(res, result, 'Làm mới token thành công');
+    } catch (error) {
+      return errorResponse(res, error);
     }
-
-    const { id: userId, tokenId } = decoded;
-
-    // Bước 2: Kiểm tra token có trong Redis không
-    // Nếu không có → đã logout hoặc đã bị xóa
-    const savedToken = await tokenService.getRefreshToken(userId, tokenId);
-    if (!savedToken) {
-      return errorResponse(res, 'Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại', 401);
-    }
-
-    // Bước 3: So sánh token gửi lên với token trong Redis
-    if (savedToken.token !== token) {
-      // Có thể bị tấn công — xóa tất cả session của user này
-      await tokenService.deleteAllRefreshTokens(userId);
-      return errorResponse(res, 'Phát hiện bất thường, vui lòng đăng nhập lại', 401);
-    }
-
-    // Bước 4: Lấy thông tin user
-    const user = await User.findByPk(userId);
-    if (!user || !user.isActive) {
-      return errorResponse(res, 'Tài khoản không hợp lệ', 401);
-    }
-
-    // Bước 5: Tạo cặp token mới
-    const { accessToken: newAccessToken } = generateAccessToken(user);
-
-    // Lưu token mới vào cookie
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: tokenService.ACCESS_TOKEN_TTL * 1000, // 30 phút
-    });
-
-    return successResponse(
-      res,
-      {
-        accessToken: newAccessToken,
-      },
-      'Làm mới token thành công',
-    );
-  } catch (error) {
-    console.error('Refresh token error:', error);
-    return errorResponse(res, 'Lỗi server');
-  }
-};
+  },
+];
 
 // ─────────────────────────────────────────────────────
 // ĐĂNG XUẤT  —  POST /api/auth/logout
 // ─────────────────────────────────────────────────────
-const logout = async (req, res) => {
-  try {
-    const { refreshToken: token } = req.body;
+const logout = [
+  validateBody(logoutSchema),
+  async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+      const accessToken = req.headers.authorization?.split(' ')[1];
 
-    if (token) {
-      try {
-        // Xóa đúng token của thiết bị đang logout
-        const decoded = verifyRefreshToken(token);
-        await tokenService.deleteRefreshToken(req.user.id, decoded.tokenId);
-      } catch {
-        // Token đã hết hạn nhưng vẫn cho logout bình thường
-      }
+      if (!refreshToken) throw new AppError('Refresh token không được để trống', 400);
+
+      await authService.logout(accessToken, refreshToken);
+      return successResponse(res, {}, 'Đăng xuất thành công');
+    } catch (error) {
+      return errorResponse(res, error);
     }
-
-    return successResponse(res, null, 'Đăng xuất thành công');
-  } catch (error) {
-    return errorResponse(res, error);
-  }
-};
+  },
+];
 
 // ─────────────────────────────────────────────────────
 // ĐĂNG XUẤT TẤT CẢ THIẾT BỊ  —  POST /api/auth/logout-all
@@ -201,7 +124,9 @@ const logout = async (req, res) => {
 const logoutAll = async (req, res) => {
   try {
     // Xóa tất cả refresh token của user này trong Redis
-    await tokenService.deleteAllRefreshTokens(req.user.id);
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const userId = req.user.id;
+    await authService.logoutAll(accessToken, userId);
     return successResponse(res, null, 'Đã đăng xuất khỏi tất cả thiết bị');
   } catch (error) {
     return errorResponse(res, error);
@@ -225,13 +150,35 @@ const getSessions = async (req, res) => {
 // ─────────────────────────────────────────────────────
 const getMe = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return errorResponse(res, 'Không tìm thấy user', 404);
-    return successResponse(res, user.toSafeObject());
+    const result = await authService.getMe(req.user.id);
+    return successResponse(res, result);
   } catch (error) {
     return errorResponse(res, error);
   }
 };
+
+// ─────────────────────────────────────────────────────
+// ĐỔI MẬT KHẨU  —  PUT /api/auth/change-password
+// ─────────────────────────────────────────────────────
+const changePassword = [
+  validateBody(changePasswordSchema),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { password, new_password } = req.body;
+
+      // Kiểm tra xem user có phải là Google account không
+      const user = await User.findByPk(userId);
+      const isGoogleUser = !!user.googleId;
+
+      await authService.changePassword(userId, isGoogleUser ? null : password, new_password);
+
+      return successResponse(res, null, 'Đổi mật khẩu thành công');
+    } catch (error) {
+      return errorResponse(res, error);
+    }
+  },
+];
 
 module.exports = {
   register,
@@ -242,4 +189,5 @@ module.exports = {
   logoutAll,
   getSessions,
   getMe,
+  changePassword,
 };

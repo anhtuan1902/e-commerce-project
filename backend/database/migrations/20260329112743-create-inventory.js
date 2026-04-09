@@ -66,6 +66,10 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.fn('NOW'),
       },
+      deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
 
     // Indexes

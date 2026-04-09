@@ -80,6 +80,7 @@ const Payment = sequelize.define(
   {
     tableName: 'payments',
     timestamps: true,
+    paranoid: true,
     indexes: [
       { fields: ['order_id'] },
       { unique: true, fields: ['transaction_id'] },

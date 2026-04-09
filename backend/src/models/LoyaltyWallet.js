@@ -51,6 +51,7 @@ const LoyaltyWallet = sequelize.define(
   {
     tableName: 'loyalty_wallets',
     timestamps: true,
+    paranoid: true,
     indexes: [{ unique: true, fields: ['user_id'] }, { fields: ['status'] }],
   },
 );

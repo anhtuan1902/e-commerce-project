@@ -1,17 +1,18 @@
+const redis = require('../config/redis');
 const { verifyAccessToken } = require('../utils/jwt.util');
 const { errorResponse } = require('../utils/response.util');
 
 // ── Xác thực JWT Access Token ─────────────────────────────
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    if (!accessToken) return errorResponse(res, 'Unauthorized', 401);
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return errorResponse(res, 'Vui lòng đăng nhập', 401);
-    }
+    // Check blacklist
+    const isBlacklisted = await redis.get(`blacklist:${accessToken}`);
+    if (isBlacklisted) return errorResponse(res, 'Token đã bị thu hồi', 401);
 
-    const token = authHeader.split(' ')[1];
-    const decoded = verifyAccessToken(token);
+    const decoded = verifyAccessToken(accessToken);
 
     req.user = decoded; // { id, email, role }
     next();

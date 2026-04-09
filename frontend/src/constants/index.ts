@@ -13,6 +13,9 @@ export const API_ROUTES = {
         LOGOUT: '/auth/logout',
         ME: '/auth/me',
     },
+    PROFILE: {
+        UPDATE: '/profile/me',
+    },
     PRODUCTS: '/products',
     ORDERS: '/orders',
     VENDORS: '/vendors',

@@ -41,6 +41,7 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+      - ./uploads:/app/uploads
       - /app/node_modules
     depends_on:
       - mysql

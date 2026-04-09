@@ -18,54 +18,35 @@ const Address = sequelize.define(
       },
     },
     type: {
-      type: DataTypes.ENUM('home', 'work', 'billing', 'shipping'),
+      type: DataTypes.ENUM('home', 'work'),
       defaultValue: 'home',
       allowNull: false,
       validate: {
         isIn: {
-          args: [['home', 'work', 'billing', 'shipping']],
+          args: [['home', 'work']],
           msg: 'Loại địa chỉ không hợp lệ',
         },
       },
     },
-    address_line_1: {
-      type: DataTypes.STRING(255),
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: { msg: 'Địa chỉ dòng 1 không được để trống' },
-        len: { args: [5, 255], msg: 'Địa chỉ phải từ 5-255 ký tự' },
-      },
     },
-    address_line_2: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    address_detail: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     city: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: { msg: 'Thành phố không được để trống' },
-        len: { args: [2, 100], msg: 'Tên thành phố phải từ 2-100 ký tự' },
-      },
     },
-    state: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    postal_code: {
-      type: DataTypes.STRING(20),
+    ward: {
+      type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: { msg: 'Mã bưu điện không được để trống' },
-      },
-    },
-    country: {
-      type: DataTypes.STRING(100),
-      defaultValue: 'Vietnam',
-      allowNull: false,
-      validate: {
-        notEmpty: { msg: 'Quốc gia không được để trống' },
-      },
     },
     is_default: {
       type: DataTypes.BOOLEAN,
@@ -98,11 +79,7 @@ const Address = sequelize.define(
 
 // Method để lấy địa chỉ đầy đủ
 Address.prototype.getFullAddress = function () {
-  const parts = [this.address_line_1];
-  if (this.address_line_2) parts.push(this.address_line_2);
-  parts.push(`${this.city}, ${this.state || ''} ${this.postal_code}`);
-  parts.push(this.country);
-  return parts.filter(Boolean).join(', ');
+  return `${this.address_detail}, ${this.ward}, ${this.district}, ${this.city}`;
 };
 
 Address.associate = (models) => {

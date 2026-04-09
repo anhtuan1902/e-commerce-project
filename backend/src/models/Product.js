@@ -157,6 +157,7 @@ const Product = sequelize.define(
   {
     tableName: 'products',
     timestamps: true,
+    paranoid: true,
     indexes: [
       { fields: ['vendor_id'] },
       { fields: ['category_id'] },

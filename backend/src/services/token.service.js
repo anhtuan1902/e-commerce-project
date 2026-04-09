@@ -5,32 +5,23 @@ const redis = require('../config/redis');
 const makeKey = (userId, tokenId) => `refresh_token:${userId}:${tokenId}`;
 
 const TTL = Number(process.env.REDIS_TTL) || 604800; // 7 ngày (giây)
-const ACCESS_TOKEN_TTL = Number(process.env.ACCESS_TOKEN_TTL) || 1800; // 30 phút (giây) cho access token, dùng để set cookie maxAge
 
 // ── Lưu Refresh Token vào Redis ───────────────────────
 // Gọi khi: đăng nhập, đăng ký, refresh token
 const saveRefreshToken = async (userId, tokenId, token) => {
   const key = makeKey(userId, tokenId);
 
-  // HSET lưu dạng hash — dễ đọc hơn plain string
-  await redis.hset(key, {
-    token,
-    userId: String(userId),
-    createdAt: new Date().toISOString(),
-  });
-
-  // Đặt TTL — tự xóa sau 7 ngày
+  await redis.hset(key, { token, userId: String(userId), createdAt: new Date().toISOString() });
   await redis.expire(key, TTL);
 };
-
 // ── Lấy Refresh Token từ Redis ────────────────────────
 // Gọi khi: verify refresh token
 const getRefreshToken = async (userId, tokenId) => {
   const key = makeKey(userId, tokenId);
   const data = await redis.hgetall(key);
 
-  // hgetall trả {} nếu key không tồn tại
-  if (!data || !data.token) return null;
+  // ioredis trả null khi key không tồn tại, không phải {}
+  if (!data || Object.keys(data).length === 0) return null;
 
   return data;
 };
@@ -75,32 +66,10 @@ const getAllSessions = async (userId) => {
   return sessions;
 };
 
-const setTokenCookie = (res, refreshToken, accessToken) => {
-  // Cookie options
-  const accessTokenOptions = {
-    httpOnly: false, // Cho phép JS truy cập để frontend sử dụng
-    secure: process.env.NODE_ENV === 'production', // chỉ gửi trên HTTPS
-    sameSite: 'Strict', // chống CSRF
-    maxAge: ACCESS_TOKEN_TTL * 1000, // 30 phút (ms)
-  };
-
-  const refreshTokenOptions = {
-    httpOnly: false, // Cho phép JS truy cập để frontend sử dụng
-    secure: process.env.NODE_ENV === 'production', // chỉ gửi trên HTTPS
-    sameSite: 'Strict', // chống CSRF
-    maxAge: TTL * 1000, // 7 ngày (ms)
-  };
-
-  // Set cookie
-  res.cookie('refreshToken', refreshToken, refreshTokenOptions);
-  res.cookie('accessToken', accessToken, accessTokenOptions);
-};
-
 module.exports = {
   saveRefreshToken,
   getRefreshToken,
   deleteRefreshToken,
   deleteAllRefreshTokens,
   getAllSessions,
-  setTokenCookie,
 };

@@ -1,5 +1,5 @@
 'use strict';
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 class Vendor extends Model {
   /**
@@ -7,6 +7,83 @@ class Vendor extends Model {
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
+  static init(sequelize) {
+    super.init(
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        user_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          unique: true,
+          references: {
+            model: 'users',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE',
+        },
+        store_name: {
+          type: DataTypes.STRING(255),
+          allowNull: false,
+        },
+        description: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        logo_url: {
+          type: DataTypes.STRING(500),
+          allowNull: true,
+        },
+        banner_url: {
+          type: DataTypes.STRING(500),
+          allowNull: true,
+        },
+        contact_email: {
+          type: DataTypes.STRING(255),
+          allowNull: true,
+          validate: {
+            isEmail: true,
+          },
+        },
+        contact_phone: {
+          type: DataTypes.STRING(20),
+          allowNull: true,
+        },
+        address: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        business_type: {
+          type: DataTypes.ENUM('individual', 'business', 'enterprise'),
+          defaultValue: 'individual',
+          allowNull: false,
+        },
+        status: {
+          type: DataTypes.ENUM('pending', 'active', 'suspended', 'inactive'),
+          defaultValue: 'pending',
+          allowNull: false,
+        },
+        commission_rate: {
+          type: DataTypes.DECIMAL(5, 2),
+          defaultValue: 0.0,
+          allowNull: false,
+        },
+      },
+      {
+        sequelize,
+        modelName: 'Vendor',
+        tableName: 'vendors',
+        timestamps: true,
+        paranoid: true, // soft delete
+      },
+    );
+  }
+
   static associate(models) {
     // define association here
     Vendor.belongsTo(models.User, {

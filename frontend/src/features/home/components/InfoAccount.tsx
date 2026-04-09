@@ -1,51 +1,30 @@
+import CustomDateTimePicker from '@/components/common/CustomDateTimePicker';
 import CustomInput from '@/components/common/CustomInput';
-import { useAppSelector } from '@/hooks';
-import { InfoAccountSchema } from '@/schemas/auth.schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, MapPin, Phone, User } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import CustomSelect from '@/components/common/CustomSelect';
+import { CalendarDays, Mail, Phone, User } from 'lucide-react';
 
-const InfoAccount = ({ handleSubmitAccount }: { handleSubmitAccount: (data: any) => void }) => {
-  const currentUser = useAppSelector((state) => state.auth.user);
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      name: currentUser?.name || '',
-      email: currentUser?.email || '',
-      phone_number: currentUser?.phone || '',
-      address: currentUser?.address || '',
-    },
-    resolver: zodResolver(InfoAccountSchema),
-  });
-
-  const onSubmit = async (data: any) => {
-    await handleSubmitAccount(data);
-  };
-
+const InfoAccount = ({ handleSubmit, errors }: { handleSubmit: any; errors: any }) => {
   return (
     <div>
       <h2 className='text-2xl font-bold text-gray-900 mb-6 border-b pb-4'>Hồ sơ của tôi</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className='max-w-2xl space-y-6'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 mb-0'>
-          <div className='sm:col-span-2'>
+      <form onSubmit={handleSubmit} className='space-y-6'>
+        <div className='grid grid-cols-2 sm:grid-cols-2 mb-0 space-x-3'>
+          <div className='sm:col-span-1'>
             <CustomInput
               label='Họ và tên'
               type='text'
               icon={User}
-              registration={register('name')}
+              name='name'
               error={errors.name}
             />
           </div>
-          <div className='sm:col-span-2'>
+          <div className='sm:col-span-1'>
             <CustomInput
               label='Email (Không thể thay đổi)'
               type='email'
               icon={Mail}
               disabled
-              registration={register('email')}
+              name='email'
               error={errors.email}
             />
           </div>
@@ -54,17 +33,30 @@ const InfoAccount = ({ handleSubmitAccount }: { handleSubmitAccount: (data: any)
               label='Số điện thoại'
               type='tel'
               icon={Phone}
-              registration={register('phone_number')}
+              name='phone_number'
               error={errors.phone_number}
             />
           </div>
           <div className='sm:col-span-2'>
-            <CustomInput
-              label='Địa chỉ giao hàng mặc định'
-              type='text'
-              icon={MapPin}
-              registration={register('address')}
-              error={errors.address}
+            <CustomDateTimePicker
+              label='Ngày sinh'
+              format='YYYY-MM-DD'
+              icon={CalendarDays}
+              name='birthday'
+              error={errors.birthday}
+            />
+          </div>
+          <div className='sm:col-span-2 me-3'>
+            <CustomSelect
+              label='Giới tính'
+              options={[
+                { value: 'male', label: 'Nam' },
+                { value: 'female', label: 'Nữ' },
+                { value: 'other', label: 'Khác' },
+              ]}
+              icon={User}
+              name='gender'
+              error={errors.gender}
             />
           </div>
         </div>

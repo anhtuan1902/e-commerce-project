@@ -3,10 +3,10 @@
     "target": "ESNext",
     "module": "ESNext",
     "jsx": "react-jsx",
-    "moduleResolution": "Node",
     "strict": true,
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] },
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "6.0"
   }
 }

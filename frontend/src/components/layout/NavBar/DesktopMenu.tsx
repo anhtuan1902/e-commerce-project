@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks';
 import useCheckRole from '@/hooks/useCheckRole';
 import { logoutThunk } from '@/store/slices/authSlice';
 import { Avatar, Dropdown, Space } from 'antd';
-import { LogOut, ShoppingCart, User } from 'lucide-react';
+import { LogOut, ShoppingCart, User, User2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface DesktopMenuProps {
@@ -91,11 +91,22 @@ const DesktopMenu = ({ onCartClick, onLoginClick, onSignUpClick }: DesktopMenuPr
           >
             <a onClick={(e) => e.preventDefault()}>
               <Space>
-                <Avatar
-                  src={<img src={user?.avatar} referrerPolicy='no-referrer' alt={user?.name} />}
-                />
+                {user?.profile?.avatarUrl ? (
+                  <Avatar
+                    src={
+                      <img
+                        src={user?.profile?.avatarUrl}
+                        referrerPolicy='no-referrer'
+                        alt={user?.profile?.name}
+                      />
+                    }
+                  />
+                ) : (
+                  <Avatar icon={<User2 />} />
+                )}
+
                 <span className='hidden lg:inline-block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                  {user?.name}
+                  {user?.profile?.name}
                 </span>
               </Space>
             </a>

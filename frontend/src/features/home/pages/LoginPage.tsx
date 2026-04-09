@@ -17,6 +17,10 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(LoginRequestSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
   const handleSubmitLogin = async (data: any) => {
@@ -27,7 +31,7 @@ const LoginPage = () => {
     <>
       <Header />
 
-      <div className='max-w-md mx-auto px-4 py-20'>
+      <div className='max-w-md mx-auto px-4 py-10'>
         <div className='bg-white rounded-2xl shadow-lg border border-gray-200 p-8'>
           <div className='text-center mb-8'>
             <div className='inline-flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-[#1E3A8A] mb-4'>
@@ -43,6 +47,7 @@ const LoginPage = () => {
               type='email'
               placeholder='you@example.com'
               icon={Mail}
+              name='email'
               registration={register('email')}
               error={errors.email}
             />
@@ -51,6 +56,7 @@ const LoginPage = () => {
               type='password'
               placeholder='••••••••'
               icon={Lock}
+              name='password'
               registration={register('password')}
               error={errors.password}
             />

@@ -2,16 +2,51 @@ import { useState } from 'react';
 import Header from '../components/Header';
 import { Lock, Mail, Store, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { RegisterCustomerRequestSchema, RegisterVendorRequestSchema } from '@/schemas/auth.schema';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import CustomInput from '@/components/common/CustomInput';
+import useRegister from '../hooks/useRegister';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [accountType, setAccountType] = useState('customer');
+  const { registerSubmit, isLoading, error } = useRegister(accountType);
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(
+      accountType === 'customer' ? RegisterCustomerRequestSchema : RegisterVendorRequestSchema,
+    ),
+    defaultValues:
+      accountType === 'customer'
+        ? {
+            name: '',
+            email: '',
+            password: '',
+            confirm_password: '',
+          }
+        : {
+            name: '',
+            email: '',
+            password: '',
+            confirm_password: '',
+            store_name: '',
+          },
+  });
+
+  const handleSubmitRegister = async (data: any) => {
+    await registerSubmit(data);
+  };
 
   return (
     <>
       <Header />
 
-      <div className='max-w-lg mx-auto px-4 py-20'>
+      <div className='max-w-lg mx-auto px-4 py-10'>
         <div className='bg-white rounded-2xl shadow-lg border border-gray-200 p-8'>
           <div className='text-center mb-8'>
             <h2 className='text-2xl font-bold text-gray-900'>Tạo tài khoản mới</h2>
@@ -35,73 +70,52 @@ const RegisterPage = () => {
             </button>
           </div>
 
-          <form
-            className='space-y-5'
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Họ và tên</label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <User className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  type='text'
-                  required
-                  className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none'
-                  placeholder='Nguyễn Văn A'
-                />
-              </div>
-            </div>
+          <form className='space-y-5' onSubmit={handleSubmit(handleSubmitRegister)}>
+            <CustomInput
+              label='Họ và tên'
+              type='text'
+              placeholder='Nguyễn Văn A'
+              icon={User}
+              name='name'
+              error={errors.name}
+            />
+
+            <CustomInput
+              label='Email'
+              type='email'
+              placeholder='Nhập email...'
+              icon={Mail}
+              name='email'
+              error={errors.email}
+            />
 
             {accountType === 'vendor' && (
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Tên cửa hàng</label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <Store className='h-5 w-5 text-gray-400' />
-                  </div>
-                  <input
-                    type='text'
-                    required
-                    className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none'
-                    placeholder='Tên shop của bạn...'
-                  />
-                </div>
-              </div>
+              <CustomInput
+                label='Tên cửa hàng'
+                type='text'
+                placeholder='Tên shop của bạn...'
+                icon={Store}
+                name='store_name'
+                error={errors.store_name}
+              />
             )}
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <Mail className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  type='email'
-                  required
-                  className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none'
-                  placeholder='you@example.com'
-                />
-              </div>
-            </div>
+            <CustomInput
+              label='Mật khẩu'
+              type='password'
+              placeholder='••••••••'
+              icon={Lock}
+              name='password'
+            />
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Mật khẩu</label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                  <Lock className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  type='password'
-                  required
-                  className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none'
-                  placeholder='••••••••'
-                />
-              </div>
-            </div>
+            <CustomInput
+              label='Xác nhận mật khẩu'
+              type='password'
+              placeholder='••••••••'
+              icon={Lock}
+              name='confirm_password'
+              error={errors.confirm_password}
+            />
 
             <button
               type='submit'

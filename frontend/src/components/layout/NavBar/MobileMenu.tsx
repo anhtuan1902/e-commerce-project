@@ -13,7 +13,6 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const user = useAppSelector((state) => state.auth.user);
 
   const isVendor = useCheckRole({ role: 'vendor' });
   if (!isOpen) return null;

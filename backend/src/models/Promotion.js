@@ -158,22 +158,22 @@ Promotion.prototype.calculateDiscount = function (orderTotal) {
 
   let discount = 0;
 
-  switch (this.type) {
-    case 'percentage':
-      discount = (orderTotal * this.discount_value) / 100;
-      break;
-    case 'fixed_amount':
-      discount = parseFloat(this.discount_value);
-      break;
-    case 'free_shipping':
-      // This would be handled separately in shipping calculation
-      discount = 0;
-      break;
-    case 'buy_x_get_y':
-      // Complex logic for buy X get Y free
-      discount = 0; // Placeholder
-      break;
-  }
+  // switch (this.type) {
+  //   case 'percentage':
+  //     discount = (orderTotal * this.discount_value) / 100;
+  //     break;
+  //   case 'fixed_amount':
+  //     discount = parseFloat(this.discount_value);
+  //     break;
+  //   case 'free_shipping':
+  //     // This would be handled separately in shipping calculation
+  //     discount = 0;
+  //     break;
+  //   case 'buy_x_get_y':
+  //     // Complex logic for buy X get Y free
+  //     discount = 0; // Placeholder
+  //     break;
+  // }
 
   if (this.maximum_discount && discount > this.maximum_discount) {
     discount = this.maximum_discount;

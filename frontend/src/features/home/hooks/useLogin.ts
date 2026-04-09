@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { LoginRequestSchema } from "@/schemas/auth.schema";
-import { loginThunk, logoutThunk } from "@/store/slices/authSlice";
+import { loginThunk } from "@/store/slices/authSlice";
 import { LoginRequest } from "@/types/auth.types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -48,7 +48,7 @@ const useLogin = () => {
     return {
         login,
         loginWithGoogle,
-        isLoading: authState.isLoading,
+        isLoading: authState?.isLoading,
         error: validationError || authState.error,
         isAuthenticated: authState.isAuthenticated,
         user: authState.user,

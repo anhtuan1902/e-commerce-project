@@ -11,11 +11,6 @@ module.exports = {
         allowNull: false,
       },
 
-      name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-
       email: {
         type: Sequelize.STRING(150),
         allowNull: false,
@@ -36,17 +31,6 @@ module.exports = {
       googleId: {
         type: Sequelize.STRING,
         allowNull: true,
-      },
-
-      avatar: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-
-      phone: {
-        type: Sequelize.STRING,
-        allowNull: true,
-        unique: true,
       },
 
       isVerified: {
@@ -82,12 +66,15 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.fn('NOW'),
       },
+      deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
 
     // Index giúp query nhanh hơn
     await queryInterface.addIndex('users', ['email']);
     await queryInterface.addIndex('users', ['role']);
-    await queryInterface.addIndex('users', ['phone']);
   },
 
   async down(queryInterface) {

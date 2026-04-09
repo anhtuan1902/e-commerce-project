@@ -44,8 +44,9 @@ api.interceptors.response.use(
           refreshToken: refreshToken,
         });
 
-        // Lấy accessToken từ cookie mới được set
-        const accessToken = response.data.accessToken || Cookies.get('accessToken');
+        Cookies.set('accessToken', response.data.data.accessToken);
+        Cookies.set('refreshToken', response.data.data.refreshToken);
+        const accessToken = response.data.data.accessToken || Cookies.get('accessToken');
 
         if (!accessToken) {
           throw new Error('No access token after refresh');

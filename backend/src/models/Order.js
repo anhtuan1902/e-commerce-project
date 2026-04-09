@@ -116,6 +116,7 @@ const Order = sequelize.define(
   {
     tableName: 'orders',
     timestamps: true,
+    paranoid: true,
     indexes: [
       { unique: true, fields: ['order_number'] },
       { fields: ['user_id'] },

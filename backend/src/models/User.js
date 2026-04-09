@@ -11,15 +11,6 @@ const User = sequelize.define(
       primaryKey: true,
     },
 
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      validate: {
-        notEmpty: { msg: 'Tên không được để trống' },
-        len: { args: [2, 100], msg: 'Tên phải từ 2-100 ký tự' },
-      },
-    },
-
     email: {
       type: DataTypes.STRING(150),
       allowNull: false,
@@ -43,17 +34,6 @@ const User = sequelize.define(
     googleId: {
       type: DataTypes.STRING,
       allowNull: true,
-    },
-
-    avatar: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-
-    phone: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      unique: { msg: 'Số điện thoại đã tồn tại' },
     },
 
     // Trạng thái tài khoản
@@ -81,11 +61,7 @@ const User = sequelize.define(
   {
     tableName: 'users',
     timestamps: true, // tự tạo createdAt, updatedAt
-
-    // Ẩn password & refreshToken mặc định
-    defaultScope: {
-      attributes: { exclude: ['password', 'refreshToken'] },
-    },
+    paranoid: true, // soft delete
 
     scopes: {
       withPassword: { attributes: {} }, // lấy tất cả khi verify login
@@ -111,10 +87,12 @@ User.prototype.comparePassword = async function (plainPassword) {
   return bcrypt.compare(plainPassword, this.password);
 };
 
-// Trả object không có thông tin nhạy cảm
+// Trả object không có thông tin nhạy cảm của user và thêm trường is_google nếu có googleId
 User.prototype.toSafeObject = function () {
   /* eslint-disable no-unused-vars */
   const { password, refreshToken, googleId, ...safe } = this.toJSON(); // loại bỏ các trường nhạy cảm
+
+  safe.no_password = !!googleId && !password; // thêm trường isGoogle
   return safe;
 };
 

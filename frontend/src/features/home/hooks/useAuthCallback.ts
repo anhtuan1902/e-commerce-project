@@ -1,4 +1,5 @@
 import { useAppDispatch } from '@/hooks';
+import { jwtService } from '@/services/jwt.services';
 import { getMeThunk } from '@/store/slices/authSlice';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -24,12 +25,22 @@ export function useAuthCallback() {
             if (error) throw new Error(error);
 
 
-            // 3. Lấy thông tin user (nếu cần)
+            // 3. Luu token với cookie
+            const accessToken = searchParams.get('accessToken');
+            const refreshToken = searchParams.get('refreshToken');
+
+            if (accessToken && refreshToken) {
+                jwtService.setToken(accessToken);
+                jwtService.setRefreshToken(refreshToken);
+            }
+
+
+            // 4. Lấy thông tin user (nếu cần)
             await dispatch(getMeThunk()).unwrap();
 
             setStatus('success');
 
-            // 6. Redirect — replace: true để back button không về /auth/callback
+            // 5. Redirect — replace: true để back button không về /auth/callback
             navigate('/', { replace: true });
 
         } catch (err) {
