@@ -10,10 +10,8 @@ const {
 } = require('../controllers/category.controller');
 
 const { authenticate } = require('../middlewares/auth.middleware');
-const requireRole = require('../middlewares/role.middleware');
 
 // Tất cả routes đều cần authentication
-router.use(authenticate);
 
 /**
  * @openapi
@@ -60,6 +58,8 @@ router.get('/', getCategories);
  */
 router.get('/:id', getCategoryById);
 
+router.use(authenticate);
+
 /**
  * @openapi
  * /api/categories:
@@ -98,7 +98,7 @@ router.get('/:id', getCategoryById);
  *       201:
  *         description: Danh mục đã được tạo
  */
-router.post('/', requireRole('admin'), createCategory);
+router.post('/', createCategory);
 
 /**
  * @openapi
@@ -140,7 +140,7 @@ router.post('/', requireRole('admin'), createCategory);
  *       200:
  *         description: Danh mục đã được cập nhật
  */
-router.put('/:id', requireRole('admin'), updateCategory);
+router.put('/:id', updateCategory);
 
 /**
  * @openapi
@@ -161,6 +161,6 @@ router.put('/:id', requireRole('admin'), updateCategory);
  *       200:
  *         description: Danh mục đã được xóa
  */
-router.delete('/:id', requireRole('admin'), deleteCategory);
+router.delete('/:id', deleteCategory);
 
 module.exports = router;

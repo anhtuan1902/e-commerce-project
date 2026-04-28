@@ -54,6 +54,14 @@ const registerSchema = z.object({
   birthday: z.preprocess(emptyToNull, z.string().nullable().optional()),
 
   gender: z.enum(['male', 'female', 'other']).nullable().optional(),
+
+  store_name: z
+    .string()
+    .min(2, 'Tên cửa hàng phải có ít nhất 2 ký tự')
+    .max(100, 'Tên cửa hàng không được vượt quá 100 ký tự')
+    .trim()
+    .optional()
+    .or(z.literal('').nullable()),
 });
 
 const loginSchema = z.object({
@@ -302,19 +310,25 @@ const createCategorySchema = z.object({
     .trim()
     .optional(),
 
-  description: z.string().max(10000, 'Mô tả không được vượt quá 10000 ký tự').optional(),
+  description: z
+    .string()
+    .max(10000, 'Mô tả không được vượt quá 10000 ký tự')
+    .optional()
+    .or(z.literal('').nullable()),
 
   parent_id: z
     .number()
     .int('ID danh mục cha phải là số nguyên')
     .positive('ID danh mục cha phải là số dương')
-    .optional(),
+    .optional()
+    .or(z.literal(null).nullable()),
 
   image: z
     .string()
     .url('URL hình ảnh không hợp lệ')
     .max(500, 'URL hình ảnh không được vượt quá 500 ký tự')
-    .optional(),
+    .optional()
+    .or(z.literal(null).nullable()),
 
   is_active: z.boolean().default(true),
   sort_order: z.number().int().min(0).default(0),
@@ -391,6 +405,18 @@ const paginationSchema = z.object({
     .transform((val) => parseInt(val))
     .refine((val) => val > 0 && val <= 100, 'Limit phải từ 1-100')
     .optional(),
+  page_size: z
+    .string()
+    .regex(/^\d+$/)
+    .transform((val) => parseInt(val))
+    .refine((val) => val > 0 && val <= 100, 'Page size phải từ 1-100')
+    .optional(),
+  current_page: z
+    .string()
+    .regex(/^\d+$/)
+    .transform((val) => parseInt(val))
+    .refine((val) => val > 0, 'Current page phải là số dương')
+    .optional(),
 });
 
 const userListQuerySchema = paginationSchema.extend({
@@ -431,24 +457,28 @@ const productListQuerySchema = paginationSchema.extend({
   sort_order: z.enum(['ASC', 'DESC']).default('DESC'),
 });
 
-const categoryListQuerySchema = z.object({
-  parent_id: z
-    .string()
-    .regex(/^\d+$/)
-    .transform((val) => parseInt(val))
-    .optional(),
-  is_active: z
-    .string()
-    .regex(/^(true|false)$/)
-    .transform((val) => val === 'true')
-    .default(true),
-});
-
 const orderListQuerySchema = paginationSchema.extend({
   status: z
     .enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'])
     .optional(),
 });
+
+const createVendorSchema = z.object({
+  store_name: z.string().min(2).max(100),
+  description: z.string().max(1000).optional().or(z.literal('').nullable()),
+  contact_email: z.email('Email không hợp lệ').max(255).optional().or(z.literal('').nullable()),
+  contact_phone: z
+    .string()
+    .regex(/^(\+84|84|0)(3|5|7|8|9)[0-9]{8}$/, 'Số điện thoại không hợp lệ')
+    .max(20)
+    .optional()
+    .or(z.literal('').nullable()),
+  address: z.string().max(1000).optional().or(z.literal('').nullable()),
+  business_type: z.enum(['individual', 'business', 'enterprise']).default('individual'),
+  status: z.enum(['pending', 'active', 'suspended', 'inactive']).default('pending'),
+});
+
+const updateVendorSchema = createVendorSchema.partial();
 
 module.exports = {
   // Auth schemas
@@ -481,10 +511,13 @@ module.exports = {
   // Wishlist schemas
   addToWishlistSchema,
 
+  // Vendor schemas
+  createVendorSchema,
+  updateVendorSchema,
+
   // Query schemas
   userListQuerySchema,
   productListQuerySchema,
-  categoryListQuerySchema,
   orderListQuerySchema,
 
   // Param schemas

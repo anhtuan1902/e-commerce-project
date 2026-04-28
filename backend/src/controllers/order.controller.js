@@ -1,4 +1,9 @@
 const Order = require('../models/Order');
+const OrderItem = require('../models/OrderItem');
+const Product = require('../models/Product');
+const Inventory = require('../models/Inventory');
+const Address = require('../models/Address');
+const Payment = require('../models/Payment');
 const { successResponse, errorResponse } = require('../utils/response.util');
 const { validateBody, validateQuery } = require('../middlewares/validation.middleware');
 const { createOrderSchema, orderListQuerySchema } = require('../validations');
@@ -24,26 +29,26 @@ const getOrders = [
         order: [['ordered_at', 'DESC']],
         include: [
           {
-            model: require('../models.Address'),
+            model: Address,
             as: 'shippingAddress',
             attributes: ['id', 'address_line_1', 'city', 'postal_code', 'country'],
           },
           {
-            model: require('../models.Address'),
+            model: Address,
             as: 'billingAddress',
             attributes: ['id', 'address_line_1', 'city', 'postal_code', 'country'],
           },
           {
-            model: require('../models.OrderItem'),
+            model: OrderItem,
             as: 'orderItems',
             include: [
               {
-                model: require('../models/Product'),
+                model: Product,
                 as: 'product',
                 attributes: ['id', 'name', 'slug', 'price'],
                 include: [
                   {
-                    model: require('../models.ProductImage'),
+                    model: require('../models/ProductImage'),
                     as: 'images',
                     where: { is_primary: true },
                     required: false,
@@ -84,37 +89,37 @@ const getOrderById = async (req, res) => {
       where: { id, user_id: userId },
       include: [
         {
-          model: require('../models.Address'),
+          model: Address,
           as: 'shippingAddress',
         },
         {
-          model: require('../models.Address'),
+          model: Address,
           as: 'billingAddress',
         },
         {
-          model: require('../models.OrderItem'),
+          model: OrderItem,
           as: 'orderItems',
           include: [
             {
-              model: require('../models.Product'),
+              model: Product,
               as: 'product',
               include: [
                 {
-                  model: require('../models.ProductImage'),
+                  model: require('../models/ProductImage'),
                   as: 'images',
                   attributes: ['id', 'url', 'alt_text', 'is_primary'],
                 },
                 {
-                  model: require('../models.Vendor'),
+                  model: require('../models/Vendor'),
                   as: 'vendor',
-                  attributes: ['id', 'name'],
+                  attributes: ['id', 'store_name'],
                 },
               ],
             },
           ],
         },
         {
-          model: require('../models.Payment'),
+          model: Payment,
           as: 'payments',
           attributes: ['id', 'amount', 'status', 'payment_method', 'createdAt'],
         },
@@ -161,14 +166,13 @@ const createOrder = [
 
       // Tính tổng tiền và kiểm tra sản phẩm
       let subtotal = 0;
-      const OrderItem = require('../models/OrderItem');
       const validOrderItems = [];
 
       for (const item of order_items) {
-        const product = await require('../models/Product').findByPk(item.product_id, {
+        const product = await Product.findByPk(item.product_id, {
           include: [
             {
-              model: require('../models.Inventory'),
+              model: Inventory,
               as: 'inventory',
             },
           ],
@@ -199,25 +203,31 @@ const createOrder = [
         });
       }
 
-      // Tạo đơn hàng
+      // Tạo đơn hàng trong transaction
       const order = await Order.create({
         user_id: userId,
         shipping_address_id,
         billing_address_id,
         subtotal,
-        tax_amount: 0, // Có thể tính thuế sau
-        shipping_amount: 0, // Có thể tính phí ship sau
-        discount_amount: 0, // Có thể áp dụng discount sau
+        tax_amount: 0,
+        shipping_amount: 0,
+        discount_amount: 0,
         total_amount: subtotal,
         notes,
         customer_notes,
       });
 
-      // Tạo order items
+      // Tạo order items và cập nhật sold_count
       for (const item of validOrderItems) {
         await OrderItem.create({
           order_id: order.id,
           ...item,
+        });
+
+        // Cập nhật sold_count cho sản phẩm
+        await Product.increment('sold_count', {
+          by: item.quantity,
+          where: { id: item.product_id },
         });
       }
 
@@ -225,15 +235,15 @@ const createOrder = [
       const fullOrder = await Order.findByPk(order.id, {
         include: [
           {
-            model: require('../models.Address'),
+            model: Address,
             as: 'shippingAddress',
           },
           {
-            model: require('../models.OrderItem'),
+            model: OrderItem,
             as: 'orderItems',
             include: [
               {
-                model: require('../models/Product'),
+                model: Product,
                 as: 'product',
                 attributes: ['id', 'name', 'price'],
               },

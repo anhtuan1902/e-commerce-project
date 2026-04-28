@@ -1,6 +1,8 @@
 const redis = require('../config/redis');
+const sequelize = require('../database/sequelize');
 const User = require('../models/User');
 const UserProfile = require('../models/UserProfile');
+const Vendor = require('../models/Vendor');
 const AppError = require('../utils/ApiError');
 const { generateTokenPair, verifyRefreshToken, verifyAccessToken } = require('../utils/jwt.util');
 const tokenService = require('./token.service');
@@ -21,17 +23,29 @@ async function assertPhoneAvailable(phone) {
   if (exists) throw new AppError('Số điện thoại đã được sử dụng', 409);
 }
 
-async function issueTokens(user) {
+async function issueTokens(user, transaction = null) {
   const { accessToken, refreshToken, tokenId } = generateTokenPair(user);
+  const updateOptions = { where: { id: user.id } };
+  if (transaction) updateOptions.transaction = transaction;
+
   await Promise.all([
     tokenService.saveRefreshToken(user.id, tokenId, refreshToken),
-    User.update({ lastLoginAt: new Date() }, { where: { id: user.id } }),
+    User.update({ lastLoginAt: new Date() }, updateOptions),
   ]);
   return { accessToken, refreshToken };
 }
 
-function buildUserPayload(user, profile) {
-  return { ...user.toSafeObject(), profile: profile.toSafeObject() };
+function buildUserPayload(user, profile, vendor) {
+  const payload = {
+    user: user.toSafeObject(),
+    profile: profile.toSafeObject(),
+  };
+
+  if (vendor.toSafeObject()) {
+    payload.vendor = vendor.toSafeObject();
+  }
+
+  return payload;
 }
 
 async function blacklistAction(accessToken) {
@@ -44,35 +58,64 @@ async function blacklistAction(accessToken) {
   }
 }
 
-const register = async ({ name, email, password, role, phone, birthday, gender }) => {
+const register = async ({ name, email, password, role, phone, birthday, gender, store_name }) => {
   await assertEmailAvailable(email);
   if (phone) await assertPhoneAvailable(phone);
 
-  const userRole = resolveRole(role);
+  const transaction = await sequelize.transaction();
+  try {
+    const userRole = resolveRole(role);
 
-  const user = await User.create({
-    email,
-    password,
-    role: userRole,
-    isVerified: false,
-    isActive: userRole !== 'vendor', // Vendor bị lock đến khi admin duyệt
-  });
+    const user = await User.create(
+      {
+        email,
+        password,
+        role: userRole,
+        isVerified: false,
+        isActive: userRole !== 'vendor', // Vendor bị lock đến khi admin duyệt
+      },
+      { transaction },
+    );
 
-  const profile = await UserProfile.create({
-    user_id: user.id,
-    name,
-    phone,
-    birthday,
-    gender,
-  });
+    const profile = await UserProfile.create(
+      {
+        user_id: user.id,
+        name,
+        phone,
+        birthday,
+        gender,
+      },
+      { transaction },
+    );
 
-  const tokens = await issueTokens(user);
+    if (userRole === 'vendor') {
+      const vendor = await Vendor.create(
+        {
+          user_id: user.id,
+          store_name,
+        },
+        { transaction },
+      );
 
-  return {
-    role: userRole,
-    user: buildUserPayload(user, profile),
-    ...tokens,
-  };
+      await transaction.commit();
+      return {
+        role: userRole,
+        user: buildUserPayload(user, profile, vendor),
+      };
+    }
+
+    const tokens = await issueTokens(user, transaction);
+    await transaction.commit();
+
+    return {
+      role: userRole,
+      user: buildUserPayload(user, profile),
+      ...tokens,
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 const login = async ({ email, password }) => {
@@ -166,7 +209,13 @@ const googleCallback = async (user) => {
 
 const getMe = async (userId) => {
   const user = await User.findByPk(userId, {
-    include: [{ model: UserProfile, as: 'profile' }],
+    include: [
+      { model: UserProfile, as: 'profile' },
+      {
+        model: Vendor,
+        as: 'vendor',
+      },
+    ],
   });
   if (!user) throw new AppError('Không tìm thấy user', 404);
 

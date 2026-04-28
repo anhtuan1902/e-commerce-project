@@ -9,6 +9,9 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     underscored: false,
     timestamps: true,
   },
+  dialectOptions: {
+    socketPath: undefined,
+  },
 });
 
 module.exports = sequelize;

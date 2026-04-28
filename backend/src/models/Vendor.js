@@ -170,4 +170,9 @@ Vendor.associate = (models) => {
   Vendor.hasMany(models.Booking, { foreignKey: 'vendor_id', as: 'bookings' });
 };
 
+Vendor.prototype.toSafeObject = function () {
+  const { ...safe } = this.toJSON();
+  return safe;
+};
+
 module.exports = Vendor;

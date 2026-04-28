@@ -11,13 +11,14 @@ const {
   protectedRouter: authProtectedRoutes,
 } = require('./routes/auth.routes');
 
-const userRoutes = require('./routes/user.routes');
 const addressRoutes = require('./routes/address.routes');
 const productRoutes = require('./routes/product.routes');
 const categoryRoutes = require('./routes/category.routes');
 const orderRoutes = require('./routes/order.routes');
 const wishlistRoutes = require('./routes/wishlist.routes');
 const profilesRoutes = require('./routes/profiles.routes');
+const vendorRoutes = require('./routes/vendor.routes');
+const commentRoutes = require('./routes/comment.routes');
 
 const helmet = require('helmet');
 const compression = require('compression');
@@ -55,11 +56,13 @@ app.use('/api/auth', authProtectedRoutes);
 
 // app.use('/api/users', userRoutes);
 app.use('/api/addresses', addressRoutes);
-// app.use('/api/products', productRoutes);
-// app.use('/api/categories', categoryRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/profiles', profilesRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/comments', commentRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

@@ -1,49 +1,52 @@
 const Category = require('../models/Category');
 const { successResponse, errorResponse } = require('../utils/response.util');
-const { validateBody, validateQuery } = require('../middlewares/validation.middleware');
-const {
-  createCategorySchema,
-  updateCategorySchema,
-  categoryListQuerySchema,
-} = require('../validations');
+const { validateBody } = require('../middlewares/validation.middleware');
+const { createCategorySchema, updateCategorySchema } = require('../validations');
+const { buildQueryOptions } = require('../utils/queryBuilder');
 
-// ─────────────────────────────────────────────────────
+// ──────────────────────────────────────────O───────────
 // LẤY DANH SÁCH DANH MỤC — GET /api/categories
-// ─────────────────────────────────────────────────────
-const getCategories = [
-  validateQuery(categoryListQuerySchema),
-  async (req, res) => {
-    try {
-      const { parent_id, is_active = true } = req.query;
+// ────────────────────────────────────────O─────────────
+const getCategories = async (req, res) => {
+  try {
+    const defaultWhere = {
+      is_active: req.query.is_active !== undefined ? req.query.is_active === 'true' : true,
+    };
 
-      const where = {};
-      if (parent_id !== undefined) where.parent_id = parent_id || null;
-      if (is_active !== undefined) where.is_active = is_active === 'true';
+    const { where, order, limit, offset, current_page } = buildQueryOptions(
+      req.query,
+      defaultWhere,
+    );
 
-      const categories = await Category.findAll({
+    // Có pagination
+    if (limit !== null && offset !== null) {
+      const { count, rows } = await Category.findAndCountAll({
         where,
-        order: [
-          ['sort_order', 'ASC'],
-          ['name', 'ASC'],
-        ],
-        include: [
-          {
-            model: Category,
-            as: 'children',
-            where: { is_active: true },
-            required: false,
-            order: [['sort_order', 'ASC']],
-          },
-        ],
+        order,
+        limit,
+        offset,
       });
 
-      return successResponse(res, categories);
-    } catch (error) {
-      console.error('Get categories error:', error);
-      return errorResponse(res, 'Lỗi server');
+      return successResponse(res, {
+        data: rows,
+        total_items: count,
+        total_pages: Math.ceil(count / limit),
+        current_page,
+      });
     }
-  },
-];
+
+    // Không pagination
+    const data = await Category.findAll({
+      where,
+      order,
+    });
+
+    return successResponse(res, data);
+  } catch (error) {
+    console.error('Get categories error:', error);
+    return errorResponse(res, error.message || 'Lỗi server');
+  }
+};
 
 // ─────────────────────────────────────────────────────
 // LẤY CHI TIẾT DANH MỤC — GET /api/categories/:id

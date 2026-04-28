@@ -117,6 +117,12 @@ module.exports = {
         defaultValue: false,
         allowNull: false,
       },
+      sold_count: {
+        type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
+        allowNull: false,
+        comment: 'Number of products sold',
+      },
       seo_title: {
         type: Sequelize.STRING(255),
         allowNull: true,
@@ -151,6 +157,7 @@ module.exports = {
     await queryInterface.addIndex('products', ['stock_status']);
     await queryInterface.addIndex('products', ['featured']);
     await queryInterface.addIndex('products', ['price']);
+    await queryInterface.addIndex('products', ['sold_count']);
   },
 
   async down(queryInterface, Sequelize) {

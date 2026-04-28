@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { Op } = require('sequelize');
 const { successResponse, errorResponse } = require('../utils/response.util');
 const {
   validateBody,
@@ -11,44 +12,51 @@ const {
   userListQuerySchema,
   idParamSchema,
 } = require('../validations');
+const { buildQueryOptions } = require('../utils/queryBuilder');
 
 // ─────────────────────────────────────────────────────
 // LẤY DANH SÁCH USER (ADMIN ONLY) — GET /api/users
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────
 const getUsers = [
   validateQuery(userListQuerySchema),
   async (req, res) => {
     try {
-      const { page = 1, limit = 10, search, role, isActive } = req.query;
-      const offset = (page - 1) * limit;
+      const { search, role, isActive } = req.query;
+      const { where, order, limit, offset, current_page } = buildQueryOptions(req.query);
 
-      const where = {};
       if (search) {
-        where[require('sequelize').Op.or] = [
-          { name: { [require('sequelize').Op.like]: `%${search}%` } },
-          { email: { [require('sequelize').Op.like]: `%${search}%` } },
+        where[Op.or] = [
+          { name: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
         ];
       }
       if (role) where.role = role;
       if (isActive !== undefined) where.isActive = isActive;
 
-      const { count, rows: users } = await User.findAndCountAll({
+      if (limit !== null && offset !== null) {
+        const { count, rows: users } = await User.findAndCountAll({
+          where,
+          limit,
+          offset,
+          order,
+          attributes: { exclude: ['password', 'refreshToken'] },
+        });
+
+        return successResponse(res, {
+          data: users,
+          total_items: count,
+          total_pages: Math.ceil(count / limit),
+          current_page,
+        });
+      }
+
+      const users = await User.findAll({
         where,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [['createdAt', 'DESC']],
+        order,
         attributes: { exclude: ['password', 'refreshToken'] },
       });
 
-      return successResponse(res, {
-        users,
-        pagination: {
-          total: count,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          pages: Math.ceil(count / limit),
-        },
-      });
+      return successResponse(res, users);
     } catch (error) {
       console.error('Get users error:', error);
       return errorResponse(res, 'Lỗi server');

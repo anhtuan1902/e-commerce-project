@@ -34,14 +34,7 @@ const Category = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    parent_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
-      references: {
-        model: 'categories',
-        key: 'id',
-      },
-    },
+
     image: {
       type: DataTypes.STRING(500),
       allowNull: true,
@@ -54,11 +47,6 @@ const Category = sequelize.define(
       defaultValue: true,
       allowNull: false,
     },
-    sort_order: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
   },
   {
     tableName: 'categories',
@@ -66,9 +54,7 @@ const Category = sequelize.define(
     indexes: [
       { unique: true, fields: ['name'] },
       { unique: true, fields: ['slug'] },
-      { fields: ['parent_id'] },
       { fields: ['is_active'] },
-      { fields: ['sort_order'] },
     ],
     hooks: {
       beforeValidate: async (category) => {
@@ -85,50 +71,7 @@ const Category = sequelize.define(
   },
 );
 
-// Methods
-Category.prototype.getFullPath = async function () {
-  const path = [this.name];
-  let current = this;
-
-  while (current.parent_id) {
-    current = await Category.findByPk(current.parent_id);
-    if (current) {
-      path.unshift(current.name);
-    } else {
-      break;
-    }
-  }
-
-  return path.join(' > ');
-};
-
-Category.prototype.getChildren = async function (depth = null) {
-  const where = { parent_id: this.id };
-  if (depth === 1) {
-    return await Category.findAll({ where });
-  }
-
-  // Recursive loading for deeper levels
-  const children = await Category.findAll({ where });
-  if (depth === null || depth > 1) {
-    for (const child of children) {
-      child.children = await child.getChildren(depth ? depth - 1 : null);
-    }
-  }
-
-  return children;
-};
-
 Category.associate = (models) => {
-  Category.belongsTo(models.Category, {
-    foreignKey: 'parent_id',
-    as: 'parent',
-    onDelete: 'SET NULL',
-  });
-  Category.hasMany(models.Category, {
-    foreignKey: 'parent_id',
-    as: 'children',
-  });
   Category.hasMany(models.Product, {
     foreignKey: 'category_id',
     as: 'products',

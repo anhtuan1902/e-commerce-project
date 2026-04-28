@@ -24,16 +24,6 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      parent_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'categories',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
       image: {
         type: Sequelize.STRING(500),
         allowNull: true,
@@ -41,11 +31,6 @@ module.exports = {
       is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
-        allowNull: false,
-      },
-      sort_order: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
         allowNull: false,
       },
       createdAt: {
@@ -66,9 +51,7 @@ module.exports = {
 
     // Indexes
     await queryInterface.addIndex('categories', ['slug']);
-    await queryInterface.addIndex('categories', ['parent_id']);
     await queryInterface.addIndex('categories', ['is_active']);
-    await queryInterface.addIndex('categories', ['sort_order']);
   },
 
   async down(queryInterface, Sequelize) {

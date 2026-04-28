@@ -145,6 +145,14 @@ const Product = sequelize.define(
       defaultValue: false,
       allowNull: false,
     },
+    sold_count: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      defaultValue: 0,
+      allowNull: false,
+      validate: {
+        min: 0,
+      },
+    },
     seo_title: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -168,6 +176,7 @@ const Product = sequelize.define(
       { fields: ['stock_status'] },
       { fields: ['featured'] },
       { fields: ['price'] },
+      { fields: ['sold_count'] },
     ],
     hooks: {
       beforeValidate: async (product) => {
