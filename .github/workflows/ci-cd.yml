@@ -15,28 +15,31 @@ permissions:
 jobs:
   # ══════════════════════════════════════════════════════
   # JOB 1: Test Backend
+  # Database: PostgreSQL (mặc định) - Đổi DB_DIALECT secret để dùng MySQL
   # ══════════════════════════════════════════════════════
   test-backend:
     name: 🧪 Test Backend
-    runs-on: ubuntu-latest # chạy trên máy ảo Ubuntu của GitHub
+    runs-on: ubuntu-latest
 
     services:
-      # Tạo MySQL tạm để chạy test — tự xóa sau khi job xong
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16-alpine
         env:
-          MYSQL_ROOT_PASSWORD: testpassword
-          MYSQL_DATABASE: marketplace_test
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: marketplace_test
+          POSTGRES_USER: postgres
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      # Bước 1: Lấy code từ repo về máy ảo
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Bước 2: Cài Node.js, có cache để lần sau nhanh hơn
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,28 +47,30 @@ jobs:
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
-      # Bước 3: Cài dependencies
       - name: 📦 Install dependencies
         working-directory: ./backend
         run: npm ci
 
-      # Bước 4: Tạo file .env cho test
       - name: 🔧 Create test .env
         working-directory: ./backend
         run: |
-          echo "DB_HOST=localhost"         >> .env
-          echo "DB_NAME=marketplace_test" >> .env
-          echo "DB_USER=root"             >> .env
-          echo "DB_PASSWORD=testpassword" >> .env
-          echo "JWT_SECRET=test_secret"   >> .env
-          echo "NODE_ENV=test"            >> .env
+          echo "DB_DIALECT=${{ secrets.DB_DIALECT || 'postgres' }}" >> .env
+          echo "DB_HOST=localhost"           >> .env
+          echo "DB_PORT=5432"                 >> .env
+          echo "DB_NAME=marketplace_test"     >> .env
+          echo "DB_USER=postgres"             >> .env
+          echo "DB_PASSWORD=testpassword"     >> .env
+          echo "JWT_SECRET=test_secret"       >> .env
+          echo "NODE_ENV=test"                >> .env
 
-      # Bước 5: Chạy migration trên DB test
       - name: 🗄️ Run migrations
         working-directory: ./backend
         run: npx sequelize-cli db:migrate
 
-      # Bước 6: Chạy test (npm test)
+      - name: 🔍 Lint Backend
+        working-directory: ./backend
+        run: npm run lint
+
       - name: ✅ Run tests
         working-directory: ./backend
         run: npm test
@@ -89,6 +94,16 @@ jobs:
       - name: 📦 Install
         working-directory: ./frontend
         run: npm ci
+
+      # Kiểm tra code style (lint)
+      - name: 🔍 Lint Frontend
+        working-directory: ./frontend
+        run: npm run lint
+
+      # Chạy unit tests
+      - name: ✅ Run tests
+        working-directory: ./frontend
+        run: npm test -- --run
 
       # Chỉ build thử — nếu build lỗi thì báo ngay
       - name: 🔨 Build

@@ -1,25 +1,32 @@
-// database/DatabaseFactory.js — tạo đúng instance theo type
 const MySQLDatabase = require('./MySQLDatabase');
+const PostgreSQLDatabase = require('./PostgreSQLDatabase');
 
 const drivers = {
   mysql: MySQLDatabase,
+  postgres: PostgreSQLDatabase,
 };
 
 class DatabaseFactory {
-  static create(type = process.env.DB_DIALECT ?? 'mysql', config = {}) {
-    const Driver = drivers[type];
+  static create(type = process.env.DB_DIALECT ?? 'postgres', config = {}) {
+    const normalizedType = type === 'postgresql' ? 'postgres' : type;
+    const Driver = drivers[normalizedType];
     if (!Driver) {
-      throw new Error(`Dialect không hỗ trợ: "${type}". Chọn: ${Object.keys(drivers).join(', ')}`);
+      throw new Error(
+        `Dialect "${type}" không được hỗ trợ. Chọn: ${Object.keys(drivers).join(', ')}`
+      );
     }
     return new Driver(config);
   }
 
-  // Đăng ký thêm driver mới mà không sửa file này
   static register(type, DriverClass) {
     if (!(DriverClass.prototype instanceof require('./Database'))) {
       throw new Error('Driver phải kế thừa từ Database');
     }
     drivers[type] = DriverClass;
+  }
+
+  static getSupportedDialects() {
+    return Object.keys(drivers);
   }
 }
 

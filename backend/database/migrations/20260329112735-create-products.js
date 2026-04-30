@@ -118,7 +118,7 @@ module.exports = {
         allowNull: false,
       },
       sold_count: {
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER,
         defaultValue: 0,
         allowNull: false,
         comment: 'Number of products sold',
@@ -147,7 +147,6 @@ module.exports = {
       },
     });
 
-    // Indexes
     await queryInterface.addIndex('products', ['vendor_id']);
     await queryInterface.addIndex('products', ['category_id']);
     await queryInterface.addIndex('products', ['slug']);

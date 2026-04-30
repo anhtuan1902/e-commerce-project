@@ -1,12 +1,22 @@
-const sequelize = require('./sequelize');
+const sequelize = require('./connector');
 const fs = require('fs');
 const path = require('path');
+
+const getDbInfo = () => {
+  const dialect = process.env.DB_DIALECT ?? 'postgres';
+  return {
+    dialect,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+  };
+};
 
 const connectDB = async ({ retries = 10, delay = 5000 } = {}) => {
   for (let i = retries; i > 0; i--) {
     try {
       await sequelize.authenticate();
-      console.log('[DB] Connected');
+      const dbInfo = getDbInfo();
+      console.log(`[DB] Connected to ${dbInfo.dialect}@${dbInfo.host}/${dbInfo.database}`);
       return;
     } catch (err) {
       if (i === 1) throw new Error(`[DB] Failed after ${retries} retries: ${err.message}`);

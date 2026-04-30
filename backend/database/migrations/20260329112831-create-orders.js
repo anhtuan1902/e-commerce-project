@@ -79,7 +79,7 @@ module.exports = {
         allowNull: false,
       },
       shipping_address_id: {
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER,
         allowNull: true,
         references: {
           model: 'addresses',
@@ -89,7 +89,7 @@ module.exports = {
         onDelete: 'SET NULL',
       },
       billing_address_id: {
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER,
         allowNull: true,
         references: {
           model: 'addresses',

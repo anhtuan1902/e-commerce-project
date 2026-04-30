@@ -286,19 +286,25 @@ async function seedProducts(categories, vendors) {
 async function cleanupData() {
   console.log('\n🧹 Cleaning up existing data...');
   try {
-    // Disable FK checks for truncate
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    const dialect = sequelize.getDialect();
+    
+    if (dialect === 'mysql') {
+      // MySQL: Disable FK checks for truncate
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    }
     
     await Product.destroy({ truncate: true, cascade: true, force: true });
     await Category.destroy({ truncate: true, cascade: true, force: true });
     await Vendor.destroy({ truncate: true, cascade: true, force: true });
     
-    // Re-enable FK checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    if (dialect === 'mysql') {
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    }
     console.log('✅ Cleanup completed');
   } catch (error) {
-    // Make sure to re-enable FK checks even on error
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1').catch(() => {});
+    if (sequelize.getDialect() === 'mysql') {
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 1').catch(() => {});
+    }
     console.warn('⚠ Cleanup warning (may be expected on first run):', error.message);
   }
 }

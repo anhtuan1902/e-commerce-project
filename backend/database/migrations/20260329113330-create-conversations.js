@@ -34,7 +34,7 @@ module.exports = {
         allowNull: true,
       },
       reference_id: {
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER,
         allowNull: true,
       },
       status: {
