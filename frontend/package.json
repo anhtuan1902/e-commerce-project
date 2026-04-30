@@ -33,7 +33,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.73.1",
     "react-hot-toast": "^2.6.0",
-    "react-infinite-scroll-component": "^7.1.0",
+    "react-infinite-scroll-component": "^7.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.1",
     "react-window": "^2.2.7",
@@ -55,11 +55,11 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^5.1.4",
-    "@vitest/browser": "^2.1.9",
-    "@vitest/coverage-v8": "^2.1.9",
-    "@vitest/ui": "^2.1.9",
+    "@vitest/browser": "^4.1.5",
+    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
     "babel-plugin-react-compiler": "^1.0.0",
-    "happy-dom": "^17.4.4",
+    "happy-dom": "^20.9.0",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^26.1.0",
     "msw": "^2.7.5",
@@ -67,6 +67,6 @@
     "react-scan": "^0.5.3",
     "tailwindcss": "^4.2.2",
     "vite": "^7.3.1",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.5"
   }
 }

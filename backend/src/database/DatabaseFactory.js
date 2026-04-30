@@ -9,6 +9,15 @@ const drivers = {
 class DatabaseFactory {
   static create(type = process.env.DB_DIALECT ?? 'postgres', config = {}) {
     const normalizedType = type === 'postgresql' ? 'postgres' : type;
+    
+    // Nếu Supabase được chọn, vẫn dùng PostgreSQL driver nhưng với cấu hình Supabase
+    if (normalizedType === 'supabase') {
+      return new PostgreSQLDatabase({
+        ...config,
+        useSupabase: true,
+      });
+    }
+    
     const Driver = drivers[normalizedType];
     if (!Driver) {
       throw new Error(

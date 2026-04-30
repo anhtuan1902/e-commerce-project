@@ -23,7 +23,7 @@ const ProductCard = memo(
     const handleAddClick = useCallback((e: React.MouseEvent) => {
       e.stopPropagation();
       addItem({
-        id: product.id.toString(),
+        id: product.id,
         name: product.name,
         price: Number(product.price),
         compare_price: product.compare_price ? Number(product.compare_price) : null,
