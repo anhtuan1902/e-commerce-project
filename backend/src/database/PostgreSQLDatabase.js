@@ -34,8 +34,8 @@ class PostgreSQLDatabase extends Database {
         ssl:
           process.env.DB_SSL === 'true'
             ? {
-                rejectUnauthorized: false,
-              }
+              rejectUnauthorized: false,
+            }
             : false,
       },
     };

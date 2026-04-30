@@ -47,8 +47,6 @@ const CATEGORY_TEMPLATES = [
   { name: 'Hàng xách tay', products: ['Mỹ phẩm', 'Son', 'Nước hoa', 'Kem dưỡng', 'Thực phẩm chức năng', 'Thuốc bổ'] },
 ];
 
-const PRODUCT_STATUSES = ['draft', 'active', 'inactive', 'archived'];
-const STOCK_STATUSES = ['in_stock', 'out_of_stock', 'on_backorder'];
 const VISIBILITIES = ['public', 'private', 'hidden'];
 
 function generateSlug(name) {
@@ -127,7 +125,7 @@ async function seedVendors() {
       'TechZone', 'SmartStore', 'GadgetPro', 'DigitalHub', 'ElectroWorld',
       'FashionVilla', 'StyleHub', 'TrendyWear', 'GucciStyle', 'LuxeFashion',
       'HomeDecor', 'CozyLiving', 'FurniturePlus', 'HomeStyle', 'InteriorPro',
-      'FoodMart', 'FreshMarket', 'OrganicShop', 'GourmetFood', 'DeliFresh'
+      'FoodMart', 'FreshMarket', 'OrganicShop', 'GourmetFood', 'DeliFresh',
     ]) + ' ' + faker.string.alphanumeric(4).toUpperCase();
 
     const vendor = await Vendor.create({
@@ -188,10 +186,10 @@ async function seedProducts(categories, vendors) {
     const slug = generateSlug(name) + '-' + uuidv4().slice(0, 8);
     
     // Generate price between 10,000 VND and 100,000,000 VND
-    const price = faker.number.float({ 
-      min: 0.01, 
-      max: 100000, 
-      fractionDigits: 2 
+    const price = faker.number.float({
+      min: 0.01,
+      max: 100000,
+      fractionDigits: 2,
     });
     
     // Sometimes add compare price for "sale" effect
@@ -215,7 +213,7 @@ async function seedProducts(categories, vendors) {
 
     const tags = faker.helpers.arrayElements(
       ['hot', 'new', 'sale', 'bestseller', 'featured', 'trending', 'eco', 'premium'],
-      { min: 1, max: 4 }
+      { min: 1, max: 4 },
     );
 
     const dimensions = {
@@ -269,7 +267,7 @@ async function seedProducts(categories, vendors) {
     } catch (error) {
       // Handle duplicate SKU
       if (error.name === 'SequelizeUniqueConstraintError') {
-        console.warn(`  ⚠ Duplicate SKU, retrying with new SKU...`);
+        console.warn('  ⚠ Duplicate SKU, retrying with new SKU...');
         skuCounter++;
         i--; // retry
       } else {
@@ -336,7 +334,7 @@ async function seed() {
     console.log('\n═══════════════════════════════════════════════');
     console.log('  ✅ SEED COMPLETED SUCCESSFULLY!');
     console.log('═══════════════════════════════════════════════');
-    console.log(`  📊 Summary:`);
+    console.log('  📊 Summary:');
     console.log(`     • Categories: ${categories.length}`);
     console.log(`     • Vendors: ${vendors.length}`);
     console.log(`     • Products: ${products}`);

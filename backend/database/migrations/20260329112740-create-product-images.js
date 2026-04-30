@@ -56,7 +56,7 @@ module.exports = {
     await queryInterface.addIndex('product_images', ['sort_order']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('product_images');
   },
 };

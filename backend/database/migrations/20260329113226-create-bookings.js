@@ -89,7 +89,7 @@ module.exports = {
     await queryInterface.addIndex('bookings', ['status']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('bookings');
   },
 };

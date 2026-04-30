@@ -109,7 +109,7 @@ module.exports = {
     await queryInterface.addIndex('payments', ['payment_date']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('payments');
   },
 };

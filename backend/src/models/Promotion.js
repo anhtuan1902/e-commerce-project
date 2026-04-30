@@ -153,7 +153,7 @@ Promotion.prototype.canApplyToOrder = function (orderTotal, userUsageCount = 0) 
   );
 };
 
-Promotion.prototype.calculateDiscount = function (orderTotal) {
+Promotion.prototype.calculateDiscount = function (_orderTotal) {
   if (!this.isValid()) return 0;
 
   let discount = 0;

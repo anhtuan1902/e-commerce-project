@@ -159,7 +159,7 @@ module.exports = {
     await queryInterface.addIndex('products', ['sold_count']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('products');
   },
 };

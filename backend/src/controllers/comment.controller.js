@@ -1,7 +1,6 @@
-const Comment = require('../models/Comment');
+const { Comment } = require('../models');
 const { successResponse, errorResponse } = require('../utils/response.util');
 const { validateBody } = require('../middlewares/validation.middleware');
-const { Op } = require('sequelize');
 
 // ─────────────────────────────────────────────────────
 // LẤY COMMENTS CỦA SẢN PHẨM — GET /api/comments/product/:productId

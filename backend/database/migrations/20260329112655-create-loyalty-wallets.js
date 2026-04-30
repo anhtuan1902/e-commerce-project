@@ -58,7 +58,7 @@ module.exports = {
     await queryInterface.addIndex('loyalty_wallets', ['status']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('loyalty_wallets');
   },
 };

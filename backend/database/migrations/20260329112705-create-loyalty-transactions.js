@@ -77,7 +77,7 @@ module.exports = {
     await queryInterface.addIndex('loyalty_transactions', ['reference_type', 'reference_id']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('loyalty_transactions');
   },
 };

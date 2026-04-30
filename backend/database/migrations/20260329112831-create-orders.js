@@ -144,7 +144,7 @@ module.exports = {
     await queryInterface.addIndex('orders', ['ordered_at']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('orders');
   },
 };

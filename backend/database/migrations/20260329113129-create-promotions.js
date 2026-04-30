@@ -106,7 +106,7 @@ module.exports = {
     await queryInterface.addIndex('promotions', ['coupon_code']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('promotions');
   },
 };

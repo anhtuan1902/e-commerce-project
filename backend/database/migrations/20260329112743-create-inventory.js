@@ -78,7 +78,7 @@ module.exports = {
     await queryInterface.addIndex('inventory', ['track_inventory']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('inventory');
   },
 };

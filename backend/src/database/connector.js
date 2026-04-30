@@ -21,8 +21,8 @@ const getDialectOptions = () => {
     return {
       ssl: sslEnabled
         ? {
-            rejectUnauthorized: false,
-          }
+          rejectUnauthorized: false,
+        }
         : false,
     };
   }
@@ -45,7 +45,7 @@ const sequelize = new Sequelize(
       timestamps: true,
     },
     dialectOptions: getDialectOptions(),
-  }
+  },
 );
 
 module.exports = sequelize;

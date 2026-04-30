@@ -88,7 +88,7 @@ module.exports = {
     await queryInterface.addIndex('comments', ['is_approved']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('comments');
   },
 };

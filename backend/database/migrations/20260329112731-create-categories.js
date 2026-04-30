@@ -54,7 +54,7 @@ module.exports = {
     await queryInterface.addIndex('categories', ['is_active']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('categories');
   },
 };

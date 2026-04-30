@@ -48,7 +48,7 @@ module.exports = {
     await queryInterface.addIndex('wishlists', ['user_id', 'product_id'], { unique: true });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('wishlists');
   },
 };

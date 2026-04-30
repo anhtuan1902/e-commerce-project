@@ -21,7 +21,7 @@ class DatabaseFactory {
     const Driver = drivers[normalizedType];
     if (!Driver) {
       throw new Error(
-        `Dialect "${type}" không được hỗ trợ. Chọn: ${Object.keys(drivers).join(', ')}`
+        `Dialect "${type}" không được hỗ trợ. Chọn: ${Object.keys(drivers).join(', ')}`,
       );
     }
     return new Driver(config);

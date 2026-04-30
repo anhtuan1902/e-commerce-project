@@ -66,7 +66,7 @@ module.exports = {
     await queryInterface.addIndex('conversations', ['last_message_at']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('conversations');
   },
 };

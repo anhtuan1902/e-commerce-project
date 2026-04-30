@@ -92,7 +92,7 @@ module.exports = {
     await queryInterface.addIndex('ratings', ['user_id', 'product_id'], { unique: true });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('ratings');
   },
 };

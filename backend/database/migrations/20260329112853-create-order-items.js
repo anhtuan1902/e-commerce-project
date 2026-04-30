@@ -104,7 +104,7 @@ module.exports = {
     await queryInterface.addIndex('order_items', ['product_id']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('order_items');
   },
 };

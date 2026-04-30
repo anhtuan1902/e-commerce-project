@@ -89,7 +89,7 @@ module.exports = {
     await queryInterface.addIndex('vendors', ['business_type']);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, _Sequelize) {
     await queryInterface.dropTable('vendors');
   },
 };
