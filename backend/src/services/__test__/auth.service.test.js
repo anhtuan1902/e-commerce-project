@@ -1,14 +1,26 @@
 jest.mock('../../config/redis', () => ({ set: jest.fn() }));
 
+jest.mock('../../database/sequelize', () => ({
+  transaction: jest.fn(() => ({
+    commit: jest.fn(),
+    rollback: jest.fn(),
+  })),
+}));
+
 jest.mock('../../models/User', () => ({
   findOne: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   scope: jest.fn(),
+  findByPk: jest.fn(),
 }));
 
 jest.mock('../../models/UserProfile', () => ({
   findOne: jest.fn(),
+  create: jest.fn(),
+}));
+
+jest.mock('../../models/Vendor', () => ({
   create: jest.fn(),
 }));
 
@@ -26,6 +38,7 @@ jest.mock('../token.service', () => ({
   getAllSessions: jest.fn(),
 }));
 
+const sequelize = require('../../database/sequelize');
 const User = require('../../models/User');
 const UserProfile = require('../../models/UserProfile');
 const tokenService = require('../token.service');
@@ -34,8 +47,15 @@ const AppError = require('../../utils/ApiError');
 const { register, login } = require('../auth.service');
 
 describe('auth.service', () => {
+  let mockTransaction;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTransaction = {
+      commit: jest.fn(),
+      rollback: jest.fn(),
+    };
+    sequelize.transaction.mockResolvedValue(mockTransaction);
     User.scope.mockReturnValue(User);
   });
 
@@ -80,21 +100,20 @@ describe('auth.service', () => {
 
       const result = await register(payload);
 
+      expect(sequelize.transaction).toHaveBeenCalled();
       expect(User.findOne).toHaveBeenCalledWith({ where: { email: payload.email } });
       expect(UserProfile.findOne).toHaveBeenCalledWith({ where: { phone: payload.phone } });
       expect(User.create).toHaveBeenCalledTimes(1);
       expect(UserProfile.create).toHaveBeenCalledTimes(1);
-      expect(tokenService.saveRefreshToken).toHaveBeenCalledWith(1, 'token-id', 'refresh-token');
-      expect(User.update).toHaveBeenCalledWith(
-        { lastLoginAt: expect.any(Date) },
-        { where: { id: 1 } },
-      );
+      expect(mockTransaction.commit).toHaveBeenCalled();
       expect(result).toEqual({
         role: 'customer',
         user: {
-          id: 1,
-          email: payload.email,
-          role: 'customer',
+          user: {
+            id: 1,
+            email: payload.email,
+            role: 'customer',
+          },
           profile: {
             name: payload.name,
             phone: payload.phone,

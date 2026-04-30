@@ -41,7 +41,7 @@ function buildUserPayload(user, profile, vendor) {
     profile: profile.toSafeObject(),
   };
 
-  if (vendor.toSafeObject()) {
+  if (vendor && vendor.toSafeObject && vendor.toSafeObject()) {
     payload.vendor = vendor.toSafeObject();
   }
 

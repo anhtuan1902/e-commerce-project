@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -43,16 +47,25 @@
     "@babel/preset-env": "^7.29.2",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/browser": "^2.1.9",
+    "@vitest/coverage-v8": "^2.1.9",
     "babel-plugin-react-compiler": "^1.0.0",
+    "happy-dom": "^17.4.4",
     "identity-obj-proxy": "^3.0.0",
+    "jsdom": "^26.1.0",
+    "msw": "^2.7.5",
     "prettier": "^3.1.1",
     "react-scan": "^0.5.3",
     "tailwindcss": "^4.2.2",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^2.1.9"
   }
 }
