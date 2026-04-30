@@ -75,9 +75,9 @@ export interface Product {
     description: string;
     short_description: string;
     sku: string;
-    price: string;
-    compare_price: string | null;
-    cost_price: string;
+    price: number;
+    compare_price: number | null;
+    cost_price: number;
     weight: string;
     dimensions: {
         width: number;
@@ -127,6 +127,7 @@ export interface ProductState {
 
 export interface ProductStore extends ProductState {
     selectedCategoryId: string | null;
+    searchQuery: string;
     setProducts: (products: Product[]) => void;
     setProductsWithPagination: (products: Product[], pagination: Omit<PaginationState, 'isLoading'>) => void;
     setProduct: (product: Product) => void;
@@ -134,4 +135,6 @@ export interface ProductStore extends ProductState {
     setLoading: (isLoading: boolean) => void;
     resetProducts: () => void;
     setSelectedCategoryId: (categoryId: string | null) => void;
+    setSearchQuery: (query: string) => void;
+    clearSearch: () => void;
 }

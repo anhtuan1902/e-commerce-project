@@ -3,7 +3,7 @@ import Logo from '../ui/Logo';
 
 const Footer = () => {
   return (
-    <footer className='bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 py-8 mt-auto transition-colors duration-200'>
+    <footer className='bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 py-8 mt-auto'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
           <div className='col-span-1 md:col-span-1'>

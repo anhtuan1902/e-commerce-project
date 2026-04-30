@@ -26,8 +26,7 @@ export const getRefreshToken = () => Cookies.get("refreshToken");
 
 // Remove tokens
 export const removeTokens = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
+    localStorage.removeItem("auth-storage");
     Cookies.remove("accessToken");
     Cookies.remove("refreshToken");
 };

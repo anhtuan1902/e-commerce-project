@@ -13,6 +13,8 @@ import ProductDetails from '../features/products/components/ProductDetails';
 import ProductReviews, { Review } from '../features/products/components/ProductReviews';
 import ProductDetailLoader from '../features/products/components/ProductDetailLoader';
 import toast from 'react-hot-toast';
+import { ROUTES } from '@/shared/constants/routes.constants';
+import { useCartStore } from '@/store/cart.store';
 
 const ProductDetailPage = () => {
   const navigate = useNavigate();
@@ -35,14 +37,16 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState<Review[]>([]);
 
-  const priceValue = useMemo(() => parseFloat(product.price), [product.price]);
+  const priceValue = useMemo(() => product.price, [product.price]);
   const comparePriceValue = useMemo(
-    () => (product.compare_price ? parseFloat(product.compare_price) : null),
+    () => (product.compare_price ? product.compare_price : null),
     [product.compare_price],
   );
   const stockQuantity = useMemo(() => product.inventory?.quantity ?? 99, [product.inventory]);
   const averageRating = useMemo(() => product.averageRating ?? 0, [product.averageRating]);
   const totalRatings = useMemo(() => product.totalRatings ?? 0, [product.totalRatings]);
+
+  const addCartItem = useCartStore((s) => s.addItem);
 
   // Map reviews từ product data
   useMemo(() => {
@@ -80,6 +84,15 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
       toast.error('Sản phẩm đã hết hàng');
       return;
     }
+    addCartItem({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      compare_price: Number(product.compare_price) ?? 0,
+      quantity: quantity,
+      imageUrl: mainImage as string,
+      shop: product.vendor?.store_name || '',
+    });
     toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
   };
 
@@ -93,7 +106,7 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
       toast.error('Sản phẩm đã hết hàng');
       return;
     }
-    navigate('/checkout');
+    navigate(ROUTES.CART);
   };
 
   const handleQuantityChange = (delta: number) => {

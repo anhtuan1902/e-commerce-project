@@ -15,6 +15,7 @@ export const useProductsStore = create<ProductStore>((set, get) => ({
     currentProduct: null,
     pagination: initialPagination,
     selectedCategoryId: null,
+    searchQuery: '',
 
     setProducts: (products: Product[]) =>
         set({
@@ -52,4 +53,10 @@ export const useProductsStore = create<ProductStore>((set, get) => ({
 
     setSelectedCategoryId: (categoryId: string | null) =>
         set({ selectedCategoryId: categoryId }),
+
+    setSearchQuery: (query: string) =>
+        set({ searchQuery: query }),
+
+    clearSearch: () =>
+        set({ searchQuery: '' }),
 }));

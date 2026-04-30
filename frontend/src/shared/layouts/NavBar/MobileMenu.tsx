@@ -1,9 +1,11 @@
 import useLogout from '@/features/auth/hooks/useLogout';
+import { ROUTES } from '@/shared/constants/routes.constants';
 import { getRefreshToken, removeTokens } from '@/shared/services/jwt.services';
 import useCheckRole from '@/shared/utils/useCheckRole';
 import { useAuthStore } from '@/store/auth.store';
 import { ShoppingCart, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ interface MobileMenuProps {
 
 const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
   const isVendor = useCheckRole({ role: 'vendor' });
   const { mutate } = useLogout();
@@ -27,13 +30,13 @@ const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) =>
       key: 'profile',
       label: 'Tài khoản của tôi',
       icon: <User className='mr-2' size={16} />,
-      onClick: () => console.log('Navigate to profile'),
+      onClick: () => navigate(ROUTES.PROFILE),
     },
     {
       key: 'orders',
       label: 'Đơn hàng',
       icon: <ShoppingCart className='mr-2' size={16} />,
-      onClick: () => console.log('Navigate to orders'),
+      onClick: () => navigate(ROUTES.CART),
     },
   ];
 
@@ -45,7 +48,7 @@ const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) =>
           <button
             key={item.key}
             onClick={() => handleMenuItemClick(item.onClick)}
-            className='flex w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
+            className='flex w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md'
           >
             {item.icon}
             {item.label}
@@ -55,13 +58,13 @@ const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) =>
         <>
           <button
             onClick={() => handleMenuItemClick(() => console.log('Navigate to marketplace'))}
-            className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
+            className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md'
           >
             {'Chợ điện tử'}
           </button>
           <button
             onClick={() => handleMenuItemClick(() => console.log('Navigate to vendor panel'))}
-            className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
+            className='block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md'
           >
             {'Kênh Người Bán'}
           </button>
@@ -82,7 +85,7 @@ const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) =>
               }
               mutate(refreshToken);
             }}
-            className='w-full text-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
+            className='w-full text-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md'
           >
             Đăng xuất
           </button>
@@ -91,13 +94,13 @@ const MobileMenu = ({ isOpen, onLoginClick, onSignUpClick }: MobileMenuProps) =>
         <div className='flex flex-col space-y-2 px-3'>
           <button
             onClick={() => handleMenuItemClick(onLoginClick)}
-            className='w-full text-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md transition-colors'
+            className='w-full text-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#1E3A8A] hover:bg-gray-50 rounded-md'
           >
             Đăng nhập
           </button>
           <button
             onClick={() => handleMenuItemClick(onSignUpClick)}
-            className='w-full text-center px-3 py-2 text-sm font-medium bg-[#1E3A8A] text-white rounded-lg hover:bg-indigo-700 transition-colors'
+            className='w-full text-center px-3 py-2 text-sm font-medium bg-[#1E3A8A] text-white rounded-lg hover:bg-indigo-700'
           >
             Đăng ký
           </button>

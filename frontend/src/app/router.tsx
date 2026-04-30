@@ -1,5 +1,6 @@
 import { AuthCallbackPage } from '@/features/auth/components/AuthCallbackPage';
 import { ProfilePage } from '@/features/profiles';
+import { CartCheckoutPage } from '@/pages/CartCheckoutPage';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
@@ -20,6 +21,7 @@ function AppRouter() {
             <>
               <Route path={ROUTES.HOME} element={<HomePage />} />
               <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+              <Route path={ROUTES.CART} element={<CartCheckoutPage />} />
               <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetailPage />} />
               {/* Các route khác có layout chung (Container) sẽ được thêm ở đây */}
             </>

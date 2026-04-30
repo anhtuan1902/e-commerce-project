@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../../ui/Logo';
 import DesktopMenu from './DesktopMenu';
@@ -6,22 +6,28 @@ import MobileMenu from './MobileMenu';
 import MobileSearchBar from './MobileSearchBar';
 import MobileTopBar from './MobileTopBar';
 import SearchBar from './SearchBar';
+import { useProductsStore } from '@/features/products/store/products.store';
 
 const NavBar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const setSearchQuery = useProductsStore((s) => s.setSearchQuery);
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleCartClick = () => {
+    navigate('/cart');
+  };
 
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
-    if (!isSearchOpen) {
-      setTimeout(() => searchInputRef.current?.focus(), 0);
-    }
   };
 
   return (
-    <nav className='bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors duration-200 border-b border-gray-200 dark:border-gray-800'>
+    <nav className='bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800'>
       <div className='max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-12 sm:h-14 md:h-16 lg:h-16 gap-2'>
           {/* Logo */}
@@ -32,7 +38,7 @@ const NavBar = () => {
           />
 
           {/* Desktop Search Bar */}
-          <SearchBar onSearch={() => {}} />
+          <SearchBar onSearch={handleSearch} />
 
           {/* Desktop Navigation Menu */}
           <DesktopMenu />
@@ -46,12 +52,11 @@ const NavBar = () => {
             isMenuOpen={isMenuOpen}
             onSearchToggle={handleSearchToggle}
             onMenuToggle={() => setIsMenuOpen(!isMenuOpen)}
-            onCartClick={() => {}}
           />
         </div>
 
         {/* Mobile Search Bar */}
-        <MobileSearchBar isOpen={isSearchOpen} onSearch={() => {}} />
+        <MobileSearchBar isOpen={isSearchOpen} onSearch={handleSearch} />
 
         {/* Mobile Menu */}
         <MobileMenu isOpen={isMenuOpen} onLoginClick={() => {}} onSignUpClick={() => {}} />

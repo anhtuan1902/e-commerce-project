@@ -4,7 +4,7 @@ import NavBar from './NavBar';
 
 const Container = () => {
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col font-sans transition-colors duration-200'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col font-sans'>
       {/* Header (Navbar) */}
       <NavBar />
 

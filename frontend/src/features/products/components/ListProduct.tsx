@@ -1,77 +1,96 @@
-import { ShoppingCart, Loader2 } from 'lucide-react';
+import { ROUTES } from '@/shared/constants/routes.constants';
+import { convertCurrency } from '@/shared/utils/convertCurrency';
+import { useCartStore } from '@/store/cart.store';
+import { Loader2, ShoppingCart } from 'lucide-react';
+import { memo, useCallback, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { useNavigate } from 'react-router-dom';
 import useProduct from '../hooks/useProduct';
-import { useEffect, memo } from 'react';
 import { useProductsStore } from '../store/products.store';
 import { Product } from '../types/product.type';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/shared/constants/routes.constants';
+
 
 const ProductCard = memo(
   ({
     product,
-    onAddToCart,
-    navigate,
   }: {
     product: Product;
-    onAddToCart: (e: React.MouseEvent) => void;
-    navigate: NavigateFunction;
-  }) => (
-    <div
-      className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group'
-      onClick={() =>
-        navigate(ROUTES.PRODUCT_DETAIL.replace(':id', product.id.toString()), {
-          state: {
-            product,
-          },
-        })
-      }
-    >
-      <div className='h-48 overflow-hidden bg-gray-100'>
-        <img
-          src={`https://picsum.photos/seed/${product.id}/300/300`}
-          alt={product.name}
-          className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'
-          loading='lazy'
-        />
-      </div>
-      <div className='p-4'>
-        <span className='text-xs text-[#1E3A8A] font-semibold uppercase tracking-wider'>
-          {product.attributes?.brand || 'No Brand'}
-        </span>
-        <h3 className='text-gray-900 font-medium mt-1 mb-2 line-clamp-2'>{product.name}</h3>
-        <div className='flex justify-between items-center mt-4'>
-          <span className='text-lg font-bold text-gray-900'>
-            ${Number(product.price).toLocaleString()}
+  }) => {
+    const navigate = useNavigate();
+
+    const addItem = useCartStore((s) => s.addItem);
+    const handleAddClick = useCallback((e: React.MouseEvent) => {
+      e.stopPropagation();
+      addItem({
+        id: product.id.toString(),
+        name: product.name,
+        price: Number(product.price),
+        compare_price: product.compare_price ? Number(product.compare_price) : null,
+        shop: product.vendor?.store_name || '',
+        quantity: 1,
+        imageUrl: `https://picsum.photos/seed/${product.id}/300/300`,
+      });
+      toast.success('Đã thêm vào giỏ hàng');
+    }, []);
+
+    return (
+      <div
+        className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md cursor-pointer'
+        onClick={() =>
+          navigate(ROUTES.PRODUCT_DETAIL.replace(':id', product.id.toString()), {
+            state: {
+              product,
+            },
+          })
+        }
+      >
+        <div className='h-48 overflow-hidden bg-gray-100'>
+          <img
+            src={`https://picsum.photos/seed/${product.id}/300/300`}
+            alt={product.name}
+            className='w-full h-full object-cover'
+            loading='lazy'
+            decoding='async'
+          />
+        </div>
+        <div className='p-4'>
+          <span className='text-xs text-[#1E3A8A] font-semibold uppercase tracking-wider'>
+            {product.vendor?.store_name }
           </span>
-          <button
-            className='bg-indigo-50 text-[#1E3A8A] p-2 rounded-lg hover:bg-indigo-100 transition-colors'
-            onClick={onAddToCart}
-          >
-            <ShoppingCart className='h-5 w-5' />
-          </button>
+          <h3 className='text-gray-900 font-medium mt-1 mb-2 line-clamp-2'>{product.name}</h3>
+          <div className='flex justify-between items-center mt-4'>
+            <span className='text-lg font-bold text-gray-900'>
+              {convertCurrency(Number(product.price))}
+            </span>
+            <button
+              className='bg-indigo-50 text-[#1E3A8A] p-2 rounded-lg hover:bg-indigo-100'
+              onClick={handleAddClick}
+            >
+              <ShoppingCart className='h-5 w-5' />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  ),
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if the product itself changed (by id)
+    return prevProps.product.id === nextProps.product.id;
+  }
 );
 
 ProductCard.displayName = 'ProductCard';
 
 const ListProduct = () => {
-  const navigate = useNavigate();
   const { fetchProducts, fetchMore, isLoadingInitial, hasMore } = useProduct();
   const products = useProductsStore((s) => s.products);
   const selectedCategoryId = useProductsStore((s) => s.selectedCategoryId);
+  const searchQuery = useProductsStore((s) => s.searchQuery);
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategoryId, fetchProducts]);
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    alert('Đã thêm vào giỏ hàng');
-  };
+  }, [selectedCategoryId, searchQuery]);
 
   return (
     <>
@@ -102,8 +121,6 @@ const ListProduct = () => {
             <ProductCard
               key={product.id}
               product={product}
-              onAddToCart={handleAddToCart}
-              navigate={navigate}
             />
           ))}
         </InfiniteScroll>

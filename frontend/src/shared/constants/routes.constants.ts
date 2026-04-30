@@ -8,6 +8,7 @@ const ROUTES = {
     ADMIN: '/admin',
     PRODUCTS: '/products',
     PRODUCT_DETAIL: '/products/:id',
+    CART: '/cart',
 }
 
 const API_ROUTES = {

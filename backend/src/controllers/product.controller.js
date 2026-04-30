@@ -3,6 +3,8 @@ const { successResponse, errorResponse } = require('../utils/response.util');
 const { validateBody } = require('../middlewares/validation.middleware');
 const { createProductSchema, updateProductSchema } = require('../validations');
 const { buildQueryOptions } = require('../utils/queryBuilder');
+const Vendor = require('../models/Vendor');
+const ProductImage = require('../models/ProductImage');
 
 // ─────────────────────────────────────────────────────
 // LẤY DANH SÁCH SẢN PHẨM — GET /api/products
@@ -21,6 +23,14 @@ const getProducts = async (req, res) => {
         order: safeOrder,
         limit,
         offset,
+        include: [
+          { model: Vendor, as: 'vendor', attributes: ['id', 'store_name', 'address'] },
+          {
+            model: ProductImage,
+            as: 'images',
+            attributes: ['id', 'image_url', 'alt_text', 'sort_order', 'is_primary'],
+          },
+        ],
       });
 
       return successResponse(res, {
