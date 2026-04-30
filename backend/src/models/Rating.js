@@ -34,7 +34,7 @@ const Rating = sequelize.define(
       },
     },
     rating: {
-      type: DataTypes.TINYINT,
+      type: DataTypes.SMALLINT,
       allowNull: false,
       validate: {
         min: 1,

@@ -41,7 +41,7 @@ module.exports = {
         onDelete: 'SET NULL',
       },
       rating: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.SMALLINT,
         allowNull: false,
         validate: {
           min: 1,
