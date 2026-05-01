@@ -1,6 +1,7 @@
-const { Comment } = require('../models');
+
 const { successResponse, errorResponse } = require('../utils/response.util');
 const { validateBody } = require('../middlewares/validation.middleware');
+const Comment = require('../models/Comment');
 
 // ─────────────────────────────────────────────────────
 // LẤY COMMENTS CỦA SẢN PHẨM — GET /api/comments/product/:productId

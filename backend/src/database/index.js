@@ -5,16 +5,6 @@ const path = require('path');
 const getDbInfo = () => {
   const dialect = process.env.DB_DIALECT ?? 'postgres';
   
-  if (dialect === 'supabase' && process.env.SUPABASE_DB_URL) {
-    const { URL } = require('url');
-    const dbUrl = new URL(process.env.SUPABASE_DB_URL);
-    return {
-      dialect: 'postgres (Supabase)',
-      host: dbUrl.hostname,
-      database: dbUrl.pathname.slice(1) || 'postgres',
-    };
-  }
-  
   return {
     dialect,
     host: process.env.DB_HOST,

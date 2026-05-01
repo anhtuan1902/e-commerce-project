@@ -5,12 +5,12 @@ const PromotionProduct = sequelize.define(
   'PromotionProduct',
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     promotion_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'promotions',
@@ -18,7 +18,7 @@ const PromotionProduct = sequelize.define(
       },
     },
     product_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'products',

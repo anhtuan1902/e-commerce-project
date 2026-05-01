@@ -5,12 +5,12 @@ const Product = sequelize.define(
   'Product',
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     vendor_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'vendors',
@@ -18,7 +18,7 @@ const Product = sequelize.define(
       },
     },
     category_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'categories',
@@ -146,7 +146,7 @@ const Product = sequelize.define(
       allowNull: false,
     },
     sold_count: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       defaultValue: 0,
       allowNull: false,
       validate: {

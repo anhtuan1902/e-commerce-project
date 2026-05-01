@@ -1,24 +1,26 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: marketplace_mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: marketplace_postgres_prod
     restart: always
     env_file:
       - .env
-    ports:
-      - "${MYSQL_PORT}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+      - postgres_data_prod:/var/lib/postgresql/data
     networks:
       - marketplace_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: marketplace_redis
     restart: always
     env_file:
-      - ./backend/.env
+      - .env
     ports:
       - "6379:6379"
     volumes:
@@ -44,11 +46,13 @@ services:
       - ./uploads:/app/uploads
       - /app/node_modules
     depends_on:
-      - mysql
-      - redis
+      postgres:
+        condition: service_healthy  # ✅ chờ healthcheck pass
+      redis:
+        condition: service_started
     networks:
       - marketplace_network
-    command: sh -c "while ! nc -z mysql 3306; do sleep 3; done && while ! nc -z redis 6379; do sleep 3; done && npm run dev"
+    command: npm run dev  # ✂ bỏ vòng lặp chờ mysql
 
   frontend:
     build:
@@ -70,7 +74,7 @@ services:
     command: npm run dev -- --host
 
 volumes:
-  mysql_data:
+  postgres_data_prod:
   redis_data:
 
 networks:

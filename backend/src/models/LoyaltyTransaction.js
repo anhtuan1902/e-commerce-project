@@ -5,12 +5,12 @@ const LoyaltyTransaction = sequelize.define(
   'LoyaltyTransaction',
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     user_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'users',
@@ -18,7 +18,7 @@ const LoyaltyTransaction = sequelize.define(
       },
     },
     wallet_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'loyalty_wallets',
@@ -59,7 +59,7 @@ const LoyaltyTransaction = sequelize.define(
       allowNull: true,
     },
     reference_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },

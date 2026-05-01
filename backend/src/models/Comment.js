@@ -5,12 +5,12 @@ const Comment = sequelize.define(
   'Comment',
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
     user_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'users',
@@ -18,7 +18,7 @@ const Comment = sequelize.define(
       },
     },
     product_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'products',
@@ -26,7 +26,7 @@ const Comment = sequelize.define(
       },
     },
     rating_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: 'ratings',
@@ -34,7 +34,7 @@ const Comment = sequelize.define(
       },
     },
     parent_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: 'comments',

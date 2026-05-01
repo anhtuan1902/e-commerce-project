@@ -23,23 +23,23 @@ services:
     profiles:
       - postgres
 
-  mysql:
-    image: mysql:8.4
-    container_name: marketplace_mysql_prod
-    restart: always
-    env_file:
-      - ./database/.env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-190228aT}
-      MYSQL_DATABASE: ${DB_NAME:-ecommerce_store_one_db}
-      MYSQL_USER: ${DB_USER:-ecommerce_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-190228aT}
-    volumes:
-      - mysql_data_prod:/var/lib/mysql
-    networks:
-      - marketplace_network
-    profiles:
-      - mysql
+  # mysql:
+  #   image: mysql:8.4
+  #   container_name: marketplace_mysql_prod
+  #   restart: always
+  #   env_file:
+  #     - ./database/.env
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-190228aT}
+  #     MYSQL_DATABASE: ${DB_NAME:-ecommerce_store_one_db}
+  #     MYSQL_USER: ${DB_USER:-ecommerce_user}
+  #     MYSQL_PASSWORD: ${DB_PASSWORD:-190228aT}
+  #   volumes:
+  #     - mysql_data_prod:/var/lib/mysql
+  #   networks:
+  #     - marketplace_network
+  #   profiles:
+  #     - mysql
 
   backend:
     build:

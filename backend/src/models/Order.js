@@ -5,7 +5,7 @@ const Order = sequelize.define(
   'Order',
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -15,7 +15,7 @@ const Order = sequelize.define(
       unique: true,
     },
     user_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'users',
@@ -76,7 +76,7 @@ const Order = sequelize.define(
       allowNull: false,
     },
     shipping_address_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: 'addresses',
@@ -84,7 +84,7 @@ const Order = sequelize.define(
       },
     },
     billing_address_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: 'addresses',
