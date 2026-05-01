@@ -16,7 +16,7 @@ services:
     networks:
       - marketplace_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ecommerce_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ecommerce_user} -d ${POSTGRES_DB:-ecommerce_store_one_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,12 +51,15 @@ services:
       - ./backend/.env.production
     environment:
       NODE_ENV: production
-      DB_HOST: ${DB_HOST:-postgres}
+      DB_HOST: postgres
+      REDIS_HOST: redis
     ports:
       - "5000:5000"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - marketplace_network
     profiles:
@@ -92,7 +95,6 @@ services:
 
 volumes:
   postgres_data_prod:
-  mysql_data_prod:
   redis_data_prod:
 
 networks:
