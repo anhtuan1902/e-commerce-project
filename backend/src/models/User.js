@@ -82,7 +82,7 @@ const User = sequelize.define(
   },
 );
 
-// So sánh password khi đăng nhập
+// So sánh password khi đăng nhập (Sequelize v3 uses Instance.prototype)
 User.prototype.comparePassword = async function (plainPassword) {
   return bcrypt.compare(plainPassword, this.password);
 };

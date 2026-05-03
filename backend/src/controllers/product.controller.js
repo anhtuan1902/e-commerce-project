@@ -109,7 +109,7 @@ const getProductById = async (req, res) => {
       where: { product_id: id, status: 'approved' },
       attributes: [
         'id',
-        'rating',
+        'rating_value',
         'comment',
         'title',
         'is_verified_purchase',
@@ -179,7 +179,7 @@ const getProductById = async (req, res) => {
     });
 
     const averageRating =
-      ratings.length > 0 ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length : 0;
+      ratings.length > 0 ? ratings.reduce((sum, r) => sum + r.rating_value, 0) / ratings.length : 0;
 
     // Đếm số lượt like từ wishlist
     const Wishlist = require('../models/Wishlist');
@@ -336,7 +336,8 @@ const updateProduct = [
         weight: weight !== undefined ? weight : product.weight,
         dimensions: dimensions !== undefined ? dimensions : product.dimensions,
         tags: tags !== undefined ? tags : product.tags,
-        attributes: attributes !== undefined ? attributes : product.attributes,
+        product_attributes:
+          product_attributes !== undefined ? product_attributes : product.product_attributes,
         status: status || product.status,
         visibility: visibility || product.visibility,
         allow_backorders:

@@ -33,8 +33,8 @@ const Rating = sequelize.define(
         key: 'id',
       },
     },
-    rating: {
-      type: DataTypes.SMALLINT,
+    rating_value: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
         min: 1,
@@ -75,7 +75,7 @@ const Rating = sequelize.define(
       { fields: ['user_id'] },
       { fields: ['product_id'] },
       { fields: ['order_id'] },
-      { fields: ['rating'] },
+      { fields: ['rating_value'] },
       { fields: ['status'] },
       { unique: true, fields: ['user_id', 'product_id'] },
     ],

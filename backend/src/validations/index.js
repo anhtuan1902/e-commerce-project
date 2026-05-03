@@ -274,7 +274,7 @@ const createProductSchema = z.object({
     .optional(),
 
   tags: z.array(z.string()).optional(),
-  attributes: z.record(z.any()).optional(),
+  product_attributes: z.record(z.any()).optional(),
 
   status: z.enum(['draft', 'active', 'inactive', 'archived']).default('draft'),
 

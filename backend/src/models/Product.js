@@ -111,7 +111,7 @@ const Product = sequelize.define(
         },
       },
     },
-    attributes: {
+    product_attributes: {
       type: DataTypes.JSON,
       allowNull: true,
     },

@@ -1,19 +1,19 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: marketplace_postgres_prod
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-    networks:
-      - marketplace_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: marketplace_postgres_prod
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - postgres_data_prod:/var/lib/postgresql/data
+  #   networks:
+  #     - marketplace_network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-postgres}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   redis:
     image: redis:7-alpine
@@ -46,8 +46,8 @@ services:
       - ./uploads:/app/uploads
       - /app/node_modules
     depends_on:
-      postgres:
-        condition: service_healthy  # ✅ chờ healthcheck pass
+      # postgres:
+      #   condition: service_healthy  # ✅ chờ healthcheck pass
       redis:
         condition: service_started
     networks:
@@ -74,7 +74,7 @@ services:
     command: npm run dev -- --host
 
 volumes:
-  postgres_data_prod:
+  # postgres_data_prod:
   redis_data:
 
 networks:

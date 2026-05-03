@@ -70,7 +70,7 @@ const OrderItem = sequelize.define(
       allowNull: false,
       defaultValue: 0.0,
     },
-    attributes: {
+    item_attributes: {
       type: DataTypes.JSON,
       allowNull: true,
     },
