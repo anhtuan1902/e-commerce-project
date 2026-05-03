@@ -1,0 +1,106 @@
+# ═══════════════════════════════════════════════════════════════════
+# Render Blueprint — Pull image từ Docker Hub, deploy lên Render
+#
+# Luồng deploy:
+#   GitHub Actions build & push → Docker Hub
+#   → GitHub Actions gọi Render Deploy Hook
+#   → Render pull image mới từ Docker Hub → deploy
+#
+# Setup:
+#   1. Tạo Docker Hub Access Token (dockerhub.com → Account Settings → Security)
+#   2. Tạo Render Deploy Hook (Render Dashboard → Service → Settings → Deploy Hooks)
+#   3. Thêm Secrets/Vars vào GitHub repo (Settings → Secrets and variables → Actions):
+#      Secrets:
+#        DOCKERHUB_USERNAME: <username Docker Hub>
+#        DOCKERHUB_TOKEN:    <access token Docker Hub>
+#        RENDER_DEPLOY_HOOK_BACKEND:  <hook URL backend>
+#        RENDER_DEPLOY_HOOK_FRONTEND: <hook URL frontend>
+#      Variables:
+#        VITE_API_URL:         https://marketplace-backend.onrender.com/api
+#        VITE_GOOGLE_CLIENT_ID: <client ID Google OAuth>
+#   4. Push file này lên GitHub repo (branch main)
+#   5. Trên Render Dashboard → "New" → "Blueprint" → connect repo
+#   6. Trong Render Blueprint, thêm env vars cho DOCKERHUB_USERNAME (Environment)
+#      và DOCKERHUB_TOKEN (Secrets)
+#   7. Thêm các Environment Variables còn lại trong Render Dashboard:
+#      DB_PROVIDER, SERVICE_URI_POSTGRES, SERVICE_URI_REDIS,
+#      GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FRONTEND_URL
+# ═══════════════════════════════════════════════════════════════════
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # BACKEND — Pull image từ Docker Hub
+  # ─────────────────────────────────────────────────────────────
+  - name: marketplace-backend
+    image: ${DOCKERHUB_USERNAME}/marketplace-backend:latest
+    region: singapore
+    plan: starter
+
+    # Docker Hub credentials (tạo trong Render Dashboard)
+    dockerCredentials:
+      registry: docker.io
+      username: DOCKERHUB_USERNAME
+      password: DOCKERHUB_TOKEN
+
+    # healthCheckPath: /api/auth/health
+    # Lưu ý: autoDeploy ở đây theo dõi Git branch, không tự detect image mới trên Docker Hub.
+    # Deploy thực tế được trigger bởi Render Deploy Hook từ GitHub Actions.
+    autoDeploy: true
+    branch: main
+
+    numInstances: 1
+    instanceSize: starter
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+
+      # Database, Redis, OAuth, JWT — thêm trong Render Dashboard
+      - key: DB_PROVIDER
+        sync: false
+      - key: SERVICE_URI_POSTGRES
+        sync: false
+      - key: SERVICE_URI_REDIS
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        value: https://marketplace-backend.onrender.com/api/auth/google/callback
+      - key: FRONTEND_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+  # ─────────────────────────────────────────────────────────────
+  # FRONTEND — Pull image từ Docker Hub
+  # ─────────────────────────────────────────────────────────────
+  - name: marketplace-frontend
+    image: ${DOCKERHUB_USERNAME}/marketplace-frontend:latest
+    region: singapore
+    plan: starter
+
+    # Docker Hub credentials (tạo trong Render Dashboard)
+    dockerCredentials:
+      registry: docker.io
+      username: DOCKERHUB_USERNAME
+      password: DOCKERHUB_TOKEN
+
+    # healthCheckPath: /
+    # Deploy thực tế được trigger bởi Render Deploy Hook từ GitHub Actions.
+    autoDeploy: true
+    branch: main
+
+    numInstances: 1
+    instanceSize: starter
+
+    # Headers cho SPA (React Router)
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate

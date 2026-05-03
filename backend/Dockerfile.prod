@@ -7,11 +7,9 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# npm ci: giống npm install nhưng:
-# - Nhanh hơn
-# - Chỉ cài đúng version trong package-lock.json
-# - --only=production: bỏ qua devDependencies (nodemon, jest...)
-RUN npm ci --only=production
+# npm ci: nhanh hơn npm install, chỉ cài đúng version trong package-lock.json
+# --omit=dev: bỏ devDependencies (nodemon, jest, eslint...) khỏi production image
+RUN npm ci --omit=dev
 
 COPY . .
 

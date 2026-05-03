@@ -1,22 +1,29 @@
 name: CI/CD Pipeline
 
+# ──────────────────────────────────────────────────────────
 # Kích hoạt khi nào?
+# ──────────────────────────────────────────────────────────
 on:
   push:
-    branches: [main, develop] # push lên main hoặc develop
+    branches: [main, develop]
   pull_request:
-    branches: [main] # tạo PR vào main
+    branches: [main, develop]
 
 permissions:
-  contents: read # Đọc code
-  packages: write # Nếu push lên GitHub Packages
-  id-token: write # Cho OIDC token (deploy an toàn)
+  contents: read
+  packages: write   # buildx dùng GitHub cache (type=gha)
+
+# Ngăn 2 run chạy song song trên cùng 1 branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # ══════════════════════════════════════════════════════
+
+  # ══════════════════════════════════════════════════════════
   # JOB 1: Test Backend
-  # Database: PostgreSQL (mặc định) - Đổi DB_DIALECT secret để dùng MySQL
-  # ══════════════════════════════════════════════════════
+  # Database: PostgreSQL (local) — dùng trong CI test
+  # ══════════════════════════════════════════════════════════
   test-backend:
     name: 🧪 Test Backend
     runs-on: ubuntu-latest
@@ -54,18 +61,16 @@ jobs:
       - name: 🔧 Create test .env
         working-directory: ./backend
         run: |
-          echo "DB_DIALECT=${{ secrets.DB_DIALECT || 'postgres' }}" >> .env
-          echo "DB_HOST=localhost"           >> .env
-          echo "DB_PORT=5432"                 >> .env
-          echo "DB_NAME=marketplace_test"     >> .env
-          echo "DB_USER=postgres"             >> .env
-          echo "DB_PASSWORD=testpassword"     >> .env
-          echo "JWT_SECRET=test_secret"       >> .env
-          echo "NODE_ENV=test"                >> .env
-
-      - name: 🗄️ Run migrations
-        working-directory: ./backend
-        run: npx sequelize-cli db:migrate
+          echo "DB_PROVIDER=local"          >> .env
+          echo "DB_HOST=localhost"          >> .env
+          echo "DB_PORT=5432"               >> .env
+          echo "DB_NAME=marketplace_test"   >> .env
+          echo "DB_USER=postgres"           >> .env
+          echo "DB_PASSWORD=testpassword"   >> .env
+          echo "JWT_SECRET=test_secret"     >> .env
+          echo "NODE_ENV=test"              >> .env
+          echo "SERVICE_URI_REDIS="        >> .env
+          echo "SERVICE_URI_POSTGRES="     >> .env
 
       - name: 🔍 Lint Backend
         working-directory: ./backend
@@ -75,127 +80,142 @@ jobs:
         working-directory: ./backend
         run: npm test
 
-  # ══════════════════════════════════════════════════════
+  # ══════════════════════════════════════════════════════════
   # JOB 2: Test Frontend
-  # ══════════════════════════════════════════════════════
+  # ══════════════════════════════════════════════════════════
   test-frontend:
     name: 🧪 Test Frontend
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: 📦 Install
+      - name: 📦 Install dependencies
         working-directory: ./frontend
         run: npm ci
 
-      # Kiểm tra code style (lint)
       - name: 🔍 Lint Frontend
         working-directory: ./frontend
         run: npm run lint
 
-      # Chạy unit tests
       - name: ✅ Run tests
         working-directory: ./frontend
         run: npm test -- --run
 
-      # Chỉ build thử — nếu build lỗi thì báo ngay
-      - name: 🔨 Build
+      - name: 🔨 Build Frontend
         working-directory: ./frontend
         run: npm run build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
 
-  # ══════════════════════════════════════════════════════
-  # JOB 3: Build & Push Docker lên Docker Hub
-  # Chỉ chạy khi: branch main VÀ cả 2 test đều pass
-  # ══════════════════════════════════════════════════════
-  build-and-push:
-    name: 🐳 Build & Push Docker
+  # ══════════════════════════════════════════════════════════
+  # JOB 3: Build & Push Backend Docker Image → Docker Hub
+  # Chỉ chạy khi: push lên main VÀ test-backend pass
+  # ══════════════════════════════════════════════════════════
+  build-backend:
+    name: 🐳 Build & Push Backend → Docker Hub
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    needs: [test-backend, test-frontend] # phụ thuộc 2 job trên
-    if: github.ref == 'refs/heads/main' # chỉ chạy trên main
+    needs: [test-backend]
+    if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      # Đăng nhập Docker Hub bằng secret đã config
-      - name: 🔑 Login Docker Hub
+      - name: 🔓 Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 🏗️ Setup Buildx
+      - name: 🏗️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build image backend + push lên Docker Hub
-      - name: 🐳 Push Backend
-        uses: docker/build-push-action@v5
+      - name: 🐳 Build & Push Backend
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile.prod
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/marketplace-backend:latest
-          cache-from: type=gha # dùng GitHub Actions cache
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/marketplace-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/marketplace-backend:${{ github.sha }}
+          cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
 
-      # Build image frontend + push lên Docker Hub
-      - name: 🐳 Push Frontend
-        uses: docker/build-push-action@v5
+  # ══════════════════════════════════════════════════════════
+  # JOB 4: Build & Push Frontend Docker Image → Docker Hub
+  # Chỉ chạy khi: push lên main VÀ test-frontend pass
+  # ══════════════════════════════════════════════════════════
+  build-frontend:
+    name: 🐳 Build & Push Frontend → Docker Hub
+    runs-on: ubuntu-latest
+    needs: [test-frontend]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔓 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🐳 Build & Push Frontend
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/marketplace-frontend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/marketplace-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/marketplace-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
-            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
 
-  # ══════════════════════════════════════════════════════
-  # JOB 4: Deploy lên VPS
-  # ══════════════════════════════════════════════════════
-  deploy:
-    name: 🚀 Deploy
+  # ══════════════════════════════════════════════════════════
+  # JOB 5: Notify Render Backend — pull image mới từ Docker Hub
+  # Chạy sau khi build-backend push image lên Docker Hub xong
+  # ══════════════════════════════════════════════════════════
+  deploy-backend:
+    name: 🚀 Notify Render → Pull Backend image
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: [build-backend]
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔔 Trigger Render Backend Deploy
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
 
-      # SSH vào server và chạy lệnh deploy
-      - name: 🚀 Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /var/www/marketplace
-            git pull origin main
+  # ══════════════════════════════════════════════════════════
+  # JOB 6: Notify Render Frontend — pull image mới từ Docker Hub
+  # Chạy sau khi build-frontend push image lên Docker Hub xong
+  # ══════════════════════════════════════════════════════════
+  deploy-frontend:
+    name: 🚀 Notify Render → Pull Frontend image
+    runs-on: ubuntu-latest
+    needs: [build-frontend]
+    if: github.ref == 'refs/heads/main'
 
-            # Pull image mới từ Docker Hub
-            docker pull ${{ secrets.DOCKER_USERNAME }}/marketplace-backend:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/marketplace-frontend:latest
-
-            # Restart với image mới, không rebuild
-            docker-compose -f docker-compose.prod.yml up -d --no-build
-
-            # Chạy migration mới nếu có
-            docker exec marketplace_backend_prod npx sequelize-cli db:migrate
-
-            # Xóa image cũ để tiết kiệm dung lượng
-            docker image prune -f
-
-            echo "✅ Deploy thành công!"
+    steps:
+      - name: 🔔 Trigger Render Frontend Deploy
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"
