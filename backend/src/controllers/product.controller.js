@@ -307,7 +307,7 @@ const updateProduct = [
         weight,
         dimensions,
         tags,
-        attributes,
+        product_attributes,
         status,
         visibility,
         allow_backorders,
