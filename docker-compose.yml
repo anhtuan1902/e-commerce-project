@@ -1,0 +1,82 @@
+services:
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: marketplace_postgres_prod
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - postgres_data_prod:/var/lib/postgresql/data
+  #   networks:
+  #     - marketplace_network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-postgres}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace_redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    networks:
+      - marketplace_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: marketplace_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+      - /app/node_modules
+    depends_on:
+      # postgres:
+      #   condition: service_healthy  # ✅ chờ healthcheck pass
+      redis:
+        condition: service_started
+    networks:
+      - marketplace_network
+    command: npm run dev  # ✂ bỏ vòng lặp chờ mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: marketplace_frontend
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - marketplace_network
+    command: npm run dev -- --host
+
+volumes:
+  # postgres_data_prod:
+  redis_data:
+
+networks:
+  marketplace_network:
+    driver: bridge

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+build/
+.env
+.env.*
+*.lock
+.next/
+out/
+public/
