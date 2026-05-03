@@ -26,6 +26,23 @@ const morgan = require('morgan');
 const { connectDB } = require('./database');
 
 const app = express();
+
+// DEBUG - xóa sau khi fix xong
+console.log('>>> FRONTEND_URL =', process.env.FRONTEND_URL);
+
+app.use((req, res, next) => {
+  console.log('>>> Request origin:', req.headers.origin);
+  next();
+});
+
+app.use(cors({
+  origin: (origin, callback) => {
+    console.log('>>> CORS check origin:', origin);
+    callback(null, true); // Tạm allow all để xác nhận CORS hoạt động
+  },
+  credentials: true,
+}));
+
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 // init middlewares
@@ -36,6 +53,9 @@ app.use(helmet({
   crossOriginOpenerPolicy: false,        
   crossOriginEmbedderPolicy: false,    
 }));
+
+app.options('*', cors());
+
 app.use(compression());
 
 // init database
