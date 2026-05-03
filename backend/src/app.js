@@ -27,7 +27,7 @@ const { connectDB } = require('./database');
 
 const app = express();
 
-// DEBUG - xóa sau khi fix xong
+// DEBUG
 console.log('>>> FRONTEND_URL =', process.env.FRONTEND_URL);
 
 app.use((req, res, next) => {
@@ -35,27 +35,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// Chỉ dùng MỘT cors duy nhất
 app.use(cors({
   origin: (origin, callback) => {
     console.log('>>> CORS check origin:', origin);
-    callback(null, true); // Tạm allow all để xác nhận CORS hoạt động
+    callback(null, true); // Tạm allow all để test
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 // init middlewares
 app.use(morgan('dev'));
-
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  crossOriginOpenerPolicy: false,        
-  crossOriginEmbedderPolicy: false,    
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false,
 }));
-
-app.options('*', cors());
-
 app.use(compression());
 
 // init database
