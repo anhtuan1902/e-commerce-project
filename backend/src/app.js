@@ -26,13 +26,15 @@ const morgan = require('morgan');
 const { connectDB } = require('./database');
 
 const app = express();
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 // init middlewares
 app.use(morgan('dev'));
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: false,        
+  crossOriginEmbedderPolicy: false,    
 }));
 app.use(compression());
 
