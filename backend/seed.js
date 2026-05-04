@@ -15,36 +15,219 @@ const NUM_VENDORS = 50;
 
 // Vietnamese-friendly category data
 const CATEGORY_TEMPLATES = [
-  { name: 'Điện thoại & Tablet', products: ['iPhone', 'Samsung Galaxy', 'Xiaomi', 'OPPO', 'Vivo', 'Nokia', 'Realme', 'iPad', 'Huawei'] },
-  { name: 'Laptop & Máy tính', products: ['Dell XPS', 'MacBook Pro', 'HP Pavilion', 'Lenovo ThinkPad', 'ASUS ROG', 'Acer Aspire', 'Microsoft Surface', 'MSI Gaming'] },
-  { name: 'Thời trang nam', products: ['Áo sơ mi', 'Quần jeans', 'Áo polo', 'Jackets', 'Quần shorts', 'Vest', 'Áo thun', 'Kaki'] },
-  { name: 'Thời trang nữ', products: ['Váy', 'Áo blouse', 'Quần', 'Đầm', 'Jackets', 'Áo kiểu', 'Chân váy', 'Jumpsuit'] },
-  { name: 'Giày dép nam', products: ['Giày thể thao', 'Giày da', 'Sandal', 'Boot', 'Giày lười', 'Giày Oxford', 'Giày causal'] },
-  { name: 'Giày dép nữ', products: ['Giày cao gót', 'Giày búp bê', 'Giày thể thao', 'Sandal', 'Boot', 'Guốc', 'Giày mules'] },
-  { name: 'Đồng hồ & Trang sức', products: ['Đồng hồ automatic', 'Đồng hồ thông minh', 'Vòng tay', 'Dây chuyền', 'Nhẫn', 'Bông tai', 'Lắc tay'] },
-  { name: 'Thiết bị điện tử', products: ['Tai nghe', 'Loa bluetooth', 'Sạc dự phòng', 'Cáp sạc', 'Chuột không dây', 'Bàn phím', 'Webcam', 'Micro'] },
-  { name: 'Thiết bị gia đình', products: ['Nồi cơm điện', 'Máy lọc nước', 'Quạt', 'Đèn LED', 'Máy xay sinh tố', 'Bếp từ', 'Lò vi sóng'] },
-  { name: 'Thiết bị văn phòng', products: ['Máy in', 'Máy scan', 'Máy chiếu', 'Ghế văn phòng', 'Bàn làm việc', 'Kệ sách', 'Tủ hồ sơ'] },
-  { name: 'Thể thao & Dã ngoại', products: ['Bóng đá', 'Bóng rổ', 'Cầu lông', 'Bơi lội', 'Yoga', 'Camping', 'Leo núi', 'Xe đạp'] },
-  { name: 'Sức khỏe & Làm đẹp', products: ['Kem dưỡng', 'Sữa rửa mặt', 'Son môi', 'Phấn nền', 'Nước hoa', 'Dầu gội', 'Sữa tắm'] },
-  { name: 'Sách & Văn phòng phẩm', products: ['Sách văn học', 'Sách kỹ năng', 'Sách thiếu nhi', 'Vở', 'Bút', 'Giấy A4', 'Máy tính'] },
-  { name: 'Đồ chơi & Game', products: ['Lego', 'Gấu bông', 'Robot', 'Xe điều khiển', 'Game console', 'Tay cầm', 'VR headset'] },
-  { name: 'Ô tô & Xe máy', products: ['Mũ bảo hiểm', 'Găng tay', 'Bạt che', 'Dầu nhớt', 'Lốp xe', 'Phụ kiện nội thất'] },
-  { name: 'Thức ăn & Đồ uống', products: ['Cà phê', 'Trà', 'Bánh', 'Snack', 'Nước giải khát', 'Mì ăn liền', 'Gia vị'] },
-  { name: 'Chăm sóc thú cưng', products: ['Thức ăn cho mèo', 'Thức ăn cho chó', 'Đồ chơi', 'Giường', 'Vòng cổ', 'Thuốc men'] },
-  { name: 'Trang trí nhà cửa', products: ['Tranh', 'Đồng hồ treo tường', 'Gương', 'Thảm', 'Rèm', 'Gối', 'Nến thơm'] },
-  { name: 'Dụng cụ làm bếp', products: ['Dao', 'Chảo', 'Nồi', 'Dụng cụ nấu ăn', 'Hộp đựng', 'Khay', 'Muỗng đũa'] },
-  { name: 'Máy ảnh & Quay phim', products: ['Canon EOS', 'Sony Alpha', 'Nikon', 'Fujifilm', 'Tripod', 'Đèn flash', 'Túi đựng'] },
-  { name: 'Điện gia dụng', products: ['Máy lạnh', 'Máy giặt', 'Tủ lạnh', 'Tivi', 'Quạt điều hòa', 'Máy hút bụi'] },
-  { name: 'Thiết bị y tế', products: ['Nhiệt kế', 'Máy đo huyết áp', 'Máy xông', 'Khẩu trang', 'Nước rửa tay', 'Băng keo'] },
-  { name: 'Du lịch & Vali', products: ['Vali kéo', 'Túi du lịch', 'Túi đeo chéo', 'Balo', 'Ví passport', 'Gối cổ'] },
-  { name: 'Nhạc cụ', products: ['Đàn guitar', 'Đàn piano', 'Trống', 'Violin', 'Sáo', 'Micro', 'Amplifier'] },
-  { name: 'Hàng tiêu dùng', products: ['Xà phòng', 'Kem đánh răng', 'Dầu gội', 'Sữa tắm', 'Giấy ăn', 'Nước rửa chén'] },
-  { name: 'Phụ kiện công nghệ', products: ['Ốp lưng', 'Film bảo vệ', 'Dock sạc', 'Giá đỡ', 'Balo laptop', 'Túi chống sốc'] },
-  { name: 'Điện lạnh', products: ['Điều hòa', 'Tủ đông', 'Máy làm kem', 'Máy xay đá', 'Máy sấy quần áo'] },
-  { name: 'Cây cảnh & Hoa', products: ['Cây xanh', 'Hoa tươi', 'Chậu hoa', 'Đất trồng', 'Phân bón', 'Dụng cụ tưới'] },
-  { name: 'Thiết bị âm thanh', products: ['Loa karaoke', 'Micro không dây', 'Ampli', 'Mixer', 'Cáp âm thanh', 'Tai nghe DJ'] },
-  { name: 'Hàng xách tay', products: ['Mỹ phẩm', 'Son', 'Nước hoa', 'Kem dưỡng', 'Thực phẩm chức năng', 'Thuốc bổ'] },
+  {
+    name: 'Điện thoại & Tablet',
+    products: [
+      'iPhone',
+      'Samsung Galaxy',
+      'Xiaomi',
+      'OPPO',
+      'Vivo',
+      'Nokia',
+      'Realme',
+      'iPad',
+      'Huawei',
+    ],
+  },
+  {
+    name: 'Laptop & Máy tính',
+    products: [
+      'Dell XPS',
+      'MacBook Pro',
+      'HP Pavilion',
+      'Lenovo ThinkPad',
+      'ASUS ROG',
+      'Acer Aspire',
+      'Microsoft Surface',
+      'MSI Gaming',
+    ],
+  },
+  {
+    name: 'Thời trang nam',
+    products: [
+      'Áo sơ mi',
+      'Quần jeans',
+      'Áo polo',
+      'Jackets',
+      'Quần shorts',
+      'Vest',
+      'Áo thun',
+      'Kaki',
+    ],
+  },
+  {
+    name: 'Thời trang nữ',
+    products: ['Váy', 'Áo blouse', 'Quần', 'Đầm', 'Jackets', 'Áo kiểu', 'Chân váy', 'Jumpsuit'],
+  },
+  {
+    name: 'Giày dép nam',
+    products: [
+      'Giày thể thao',
+      'Giày da',
+      'Sandal',
+      'Boot',
+      'Giày lười',
+      'Giày Oxford',
+      'Giày causal',
+    ],
+  },
+  {
+    name: 'Giày dép nữ',
+    products: [
+      'Giày cao gót',
+      'Giày búp bê',
+      'Giày thể thao',
+      'Sandal',
+      'Boot',
+      'Guốc',
+      'Giày mules',
+    ],
+  },
+  {
+    name: 'Đồng hồ & Trang sức',
+    products: [
+      'Đồng hồ automatic',
+      'Đồng hồ thông minh',
+      'Vòng tay',
+      'Dây chuyền',
+      'Nhẫn',
+      'Bông tai',
+      'Lắc tay',
+    ],
+  },
+  {
+    name: 'Thiết bị điện tử',
+    products: [
+      'Tai nghe',
+      'Loa bluetooth',
+      'Sạc dự phòng',
+      'Cáp sạc',
+      'Chuột không dây',
+      'Bàn phím',
+      'Webcam',
+      'Micro',
+    ],
+  },
+  {
+    name: 'Thiết bị gia đình',
+    products: [
+      'Nồi cơm điện',
+      'Máy lọc nước',
+      'Quạt',
+      'Đèn LED',
+      'Máy xay sinh tố',
+      'Bếp từ',
+      'Lò vi sóng',
+    ],
+  },
+  {
+    name: 'Thiết bị văn phòng',
+    products: [
+      'Máy in',
+      'Máy scan',
+      'Máy chiếu',
+      'Ghế văn phòng',
+      'Bàn làm việc',
+      'Kệ sách',
+      'Tủ hồ sơ',
+    ],
+  },
+  {
+    name: 'Thể thao & Dã ngoại',
+    products: ['Bóng đá', 'Bóng rổ', 'Cầu lông', 'Bơi lội', 'Yoga', 'Camping', 'Leo núi', 'Xe đạp'],
+  },
+  {
+    name: 'Sức khỏe & Làm đẹp',
+    products: ['Kem dưỡng', 'Sữa rửa mặt', 'Son môi', 'Phấn nền', 'Nước hoa', 'Dầu gội', 'Sữa tắm'],
+  },
+  {
+    name: 'Sách & Văn phòng phẩm',
+    products: [
+      'Sách văn học',
+      'Sách kỹ năng',
+      'Sách thiếu nhi',
+      'Vở',
+      'Bút',
+      'Giấy A4',
+      'Máy tính',
+    ],
+  },
+  {
+    name: 'Đồ chơi & Game',
+    products: [
+      'Lego',
+      'Gấu bông',
+      'Robot',
+      'Xe điều khiển',
+      'Game console',
+      'Tay cầm',
+      'VR headset',
+    ],
+  },
+  {
+    name: 'Ô tô & Xe máy',
+    products: ['Mũ bảo hiểm', 'Găng tay', 'Bạt che', 'Dầu nhớt', 'Lốp xe', 'Phụ kiện nội thất'],
+  },
+  {
+    name: 'Thức ăn & Đồ uống',
+    products: ['Cà phê', 'Trà', 'Bánh', 'Snack', 'Nước giải khát', 'Mì ăn liền', 'Gia vị'],
+  },
+  {
+    name: 'Chăm sóc thú cưng',
+    products: ['Thức ăn cho mèo', 'Thức ăn cho chó', 'Đồ chơi', 'Giường', 'Vòng cổ', 'Thuốc men'],
+  },
+  {
+    name: 'Trang trí nhà cửa',
+    products: ['Tranh', 'Đồng hồ treo tường', 'Gương', 'Thảm', 'Rèm', 'Gối', 'Nến thơm'],
+  },
+  {
+    name: 'Dụng cụ làm bếp',
+    products: ['Dao', 'Chảo', 'Nồi', 'Dụng cụ nấu ăn', 'Hộp đựng', 'Khay', 'Muỗng đũa'],
+  },
+  {
+    name: 'Máy ảnh & Quay phim',
+    products: ['Canon EOS', 'Sony Alpha', 'Nikon', 'Fujifilm', 'Tripod', 'Đèn flash', 'Túi đựng'],
+  },
+  {
+    name: 'Điện gia dụng',
+    products: ['Máy lạnh', 'Máy giặt', 'Tủ lạnh', 'Tivi', 'Quạt điều hòa', 'Máy hút bụi'],
+  },
+  {
+    name: 'Thiết bị y tế',
+    products: ['Nhiệt kế', 'Máy đo huyết áp', 'Máy xông', 'Khẩu trang', 'Nước rửa tay', 'Băng keo'],
+  },
+  {
+    name: 'Du lịch & Vali',
+    products: ['Vali kéo', 'Túi du lịch', 'Túi đeo chéo', 'Balo', 'Ví passport', 'Gối cổ'],
+  },
+  {
+    name: 'Nhạc cụ',
+    products: ['Đàn guitar', 'Đàn piano', 'Trống', 'Violin', 'Sáo', 'Micro', 'Amplifier'],
+  },
+  {
+    name: 'Hàng tiêu dùng',
+    products: ['Xà phòng', 'Kem đánh răng', 'Dầu gội', 'Sữa tắm', 'Giấy ăn', 'Nước rửa chén'],
+  },
+  {
+    name: 'Phụ kiện công nghệ',
+    products: ['Ốp lưng', 'Film bảo vệ', 'Dock sạc', 'Giá đỡ', 'Balo laptop', 'Túi chống sốc'],
+  },
+  {
+    name: 'Điện lạnh',
+    products: ['Điều hòa', 'Tủ đông', 'Máy làm kem', 'Máy xay đá', 'Máy sấy quần áo'],
+  },
+  {
+    name: 'Cây cảnh & Hoa',
+    products: ['Cây xanh', 'Hoa tươi', 'Chậu hoa', 'Đất trồng', 'Phân bón', 'Dụng cụ tưới'],
+  },
+  {
+    name: 'Thiết bị âm thanh',
+    products: ['Loa karaoke', 'Micro không dây', 'Ampli', 'Mixer', 'Cáp âm thanh', 'Tai nghe DJ'],
+  },
+  {
+    name: 'Hàng xách tay',
+    products: ['Mỹ phẩm', 'Son', 'Nước hoa', 'Kem dưỡng', 'Thực phẩm chức năng', 'Thuốc bổ'],
+  },
 ];
 
 const VISIBILITIES = ['public', 'private', 'hidden'];
@@ -68,11 +251,12 @@ async function seedCategories() {
 
   for (let i = 0; i < NUM_CATEGORIES; i++) {
     const template = CATEGORY_TEMPLATES[i % CATEGORY_TEMPLATES.length];
-    const variant = i >= CATEGORY_TEMPLATES.length ? `-${Math.floor(i / CATEGORY_TEMPLATES.length) + 1}` : '';
-    
+    const variant =
+      i >= CATEGORY_TEMPLATES.length ? `-${Math.floor(i / CATEGORY_TEMPLATES.length) + 1}` : '';
+
     const name = `${template.name}${variant}`;
     const slug = generateSlug(name) + '-' + uuidv4().slice(0, 8);
-    
+
     const category = await Category.create({
       name,
       slug,
@@ -81,7 +265,7 @@ async function seedCategories() {
       is_active: faker.datatype.boolean({ probability: 0.9 }),
     });
     categories.push(category);
-    
+
     if ((i + 1) % 10 === 0) {
       console.log(`  ✓ Created ${i + 1}/${NUM_CATEGORIES} categories`);
     }
@@ -121,12 +305,31 @@ async function seedVendors() {
   // Create vendors linked to users
   for (let i = 0; i < NUM_VENDORS; i++) {
     const userId = users[i].id;
-    const storeName = faker.helpers.arrayElement([
-      'TechZone', 'SmartStore', 'GadgetPro', 'DigitalHub', 'ElectroWorld',
-      'FashionVilla', 'StyleHub', 'TrendyWear', 'GucciStyle', 'LuxeFashion',
-      'HomeDecor', 'CozyLiving', 'FurniturePlus', 'HomeStyle', 'InteriorPro',
-      'FoodMart', 'FreshMarket', 'OrganicShop', 'GourmetFood', 'DeliFresh',
-    ]) + ' ' + faker.string.alphanumeric(4).toUpperCase();
+    const storeName =
+      faker.helpers.arrayElement([
+        'TechZone',
+        'SmartStore',
+        'GadgetPro',
+        'DigitalHub',
+        'ElectroWorld',
+        'FashionVilla',
+        'StyleHub',
+        'TrendyWear',
+        'GucciStyle',
+        'LuxeFashion',
+        'HomeDecor',
+        'CozyLiving',
+        'FurniturePlus',
+        'HomeStyle',
+        'InteriorPro',
+        'FoodMart',
+        'FreshMarket',
+        'OrganicShop',
+        'GourmetFood',
+        'DeliFresh',
+      ]) +
+      ' ' +
+      faker.string.alphanumeric(4).toUpperCase();
 
     const vendor = await Vendor.create({
       user_id: userId,
@@ -166,46 +369,80 @@ async function seedProducts(categories, vendors) {
   for (let i = 0; i < NUM_PRODUCTS; i++) {
     const category = categories[i % categories.length];
     const vendor = vendors[i % vendors.length];
-    
+
     const categoryIdx = categories.indexOf(category) % CATEGORY_TEMPLATES.length;
     const baseProducts = productNamesByCategory[categoryIdx] || ['Sản phẩm'];
     const baseName = faker.helpers.arrayElement(baseProducts);
-    
+
     // Add variation to product name
     const variations = ['', 'Pro', 'Plus', 'Max', 'Mini', 'Ultra', 'Premium', 'Lite'];
-    const color = faker.helpers.arrayElement(['Đen', 'Trắng', 'Xanh', 'Đỏ', 'Vàng', 'Hồng', 'Bạc', 'Vàng gold']);
-    const storage = faker.helpers.arrayElement(['64GB', '128GB', '256GB', '512GB', '1TB', '2TB', '4GB RAM', '8GB RAM', '16GB RAM', '']);
+    const color = faker.helpers.arrayElement([
+      'Đen',
+      'Trắng',
+      'Xanh',
+      'Đỏ',
+      'Vàng',
+      'Hồng',
+      'Bạc',
+      'Vàng gold',
+    ]);
+    const storage = faker.helpers.arrayElement([
+      '64GB',
+      '128GB',
+      '256GB',
+      '512GB',
+      '1TB',
+      '2TB',
+      '4GB RAM',
+      '8GB RAM',
+      '16GB RAM',
+      '',
+    ]);
     const variation = faker.helpers.arrayElement(variations);
-    
+
     const nameParts = [baseName];
     if (variation) nameParts.push(variation);
     if (storage && faker.datatype.boolean()) nameParts.push(storage);
     if (faker.datatype.boolean(0.5)) nameParts.push(color);
-    
+
     const name = nameParts.join(' ');
     const slug = generateSlug(name) + '-' + uuidv4().slice(0, 8);
-    
+
     // Generate price between 10,000 VND and 100,000,000 VND
     const price = faker.number.float({
       min: 0.01,
       max: 100000,
       fractionDigits: 2,
     });
-    
+
     // Sometimes add compare price for "sale" effect
-    const comparePrice = faker.datatype.boolean(0.3) 
+    const comparePrice = faker.datatype.boolean(0.3)
       ? price * faker.number.float({ min: 1.1, max: 2, fractionDigits: 2 })
       : null;
-    
+
     // Generate random attributes based on category
     const attributes = {
       brand: faker.company.name(),
       warranty: faker.helpers.arrayElement(['6 tháng', '12 tháng', '24 tháng', 'Không bảo hành']),
-      origin: faker.helpers.arrayElement(['Việt Nam', 'Trung Quốc', 'Nhật Bản', 'Hàn Quốc', 'Mỹ', 'Đức']),
+      origin: faker.helpers.arrayElement([
+        'Việt Nam',
+        'Trung Quốc',
+        'Nhật Bản',
+        'Hàn Quốc',
+        'Mỹ',
+        'Đức',
+      ]),
     };
 
     if (faker.datatype.boolean(0.3)) {
-      attributes.material = faker.helpers.arrayElement(['Nhựa', 'Kim loại', 'Gỗ', 'Vải', 'Da', 'Kính']);
+      attributes.material = faker.helpers.arrayElement([
+        'Nhựa',
+        'Kim loại',
+        'Gỗ',
+        'Vải',
+        'Da',
+        'Kính',
+      ]);
     }
     if (faker.datatype.boolean(0.3)) {
       attributes.color = color;
@@ -240,7 +477,9 @@ async function seedProducts(categories, vendors) {
         sku: generateSKU(categories.indexOf(category), skuCounter++),
         price: price.toFixed(2),
         compare_price: comparePrice ? comparePrice.toFixed(2) : null,
-        cost_price: (price * faker.number.float({ min: 0.3, max: 0.7, fractionDigits: 2 })).toFixed(2),
+        cost_price: (price * faker.number.float({ min: 0.3, max: 0.7, fractionDigits: 2 })).toFixed(
+          2,
+        ),
         weight: faker.number.float({ min: 0.1, max: 50, fractionDigits: 3 }),
         dimensions,
         tags,
@@ -285,16 +524,16 @@ async function cleanupData() {
   console.log('\n🧹 Cleaning up existing data...');
   try {
     const dialect = sequelize.getDialect();
-    
+
     if (dialect === 'mysql') {
       // MySQL: Disable FK checks for truncate
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
     }
-    
+
     await Product.destroy({ truncate: true, cascade: true, force: true });
     await Category.destroy({ truncate: true, cascade: true, force: true });
     await Vendor.destroy({ truncate: true, cascade: true, force: true });
-    
+
     if (dialect === 'mysql') {
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     }

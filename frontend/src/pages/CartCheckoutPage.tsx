@@ -6,6 +6,7 @@ import { AddressItem } from '@/features/profiles/types/addresses.type';
 import useAddresses from '@/features/profiles/hooks/useAddresses';
 import { useCartStore } from '@/store/cart.store';
 import { ROUTES } from '@/shared/constants/routes.constants';
+import { ProtectedRoute } from '@/shared/common/ProtectedRoute';
 
 export const STEP_STORAGE_KEY = 'cart-checkout-step';
 
@@ -33,12 +34,15 @@ export const CartCheckoutPage = () => {
     sessionStorage.setItem(STEP_STORAGE_KEY, step);
   }, [step]);
 
-  const handleStepChange = useCallback((newStep: StepState) => {
-    setStep(newStep);
-    if (newStep === 'checkout' && addresses.length > 0 && !selectedAddressId) {
-      setSelectedAddressId(defaultAddressId);
-    }
-  }, [addresses.length, selectedAddressId, defaultAddressId]);
+  const handleStepChange = useCallback(
+    (newStep: StepState) => {
+      setStep(newStep);
+      if (newStep === 'checkout' && addresses.length > 0 && !selectedAddressId) {
+        setSelectedAddressId(defaultAddressId);
+      }
+    },
+    [addresses.length, selectedAddressId, defaultAddressId],
+  );
 
   const handleAddressChange = useCallback((address: AddressItem) => {
     setSelectedAddressId(address.id);
@@ -84,19 +88,14 @@ export const CartCheckoutPage = () => {
     }
 
     if (currentStep === 'success') {
-      return (
-        <SuccessStep
-          orderCode={orderCode}
-          onContinueShopping={() => navigate(ROUTES.HOME)}
-        />
-      );
+      return <SuccessStep orderCode={orderCode} onContinueShopping={() => navigate(ROUTES.HOME)} />;
     }
 
     return null;
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 min-h-auto bg-slate-50">
+    <div className='max-w-6xl mx-auto px-4 min-h-auto bg-slate-50'>
       <Stepper currentStep={step} />
       {renderStep(step)}
     </div>

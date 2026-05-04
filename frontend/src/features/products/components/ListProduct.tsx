@@ -9,29 +9,29 @@ import { useNavigate } from 'react-router-dom';
 import useProduct from '../hooks/useProduct';
 import { useProductsStore } from '../store/products.store';
 import { Product } from '../types/product.type';
-
+import isAuthenticated from '@/shared/utils/auth';
 
 const ProductCard = memo(
-  ({
-    product,
-  }: {
-    product: Product;
-  }) => {
+  ({ product }: { product: Product }) => {
     const navigate = useNavigate();
 
     const addItem = useCartStore((s) => s.addItem);
     const handleAddClick = useCallback((e: React.MouseEvent) => {
       e.stopPropagation();
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: Number(product.price),
-        compare_price: product.compare_price ? Number(product.compare_price) : null,
-        shop: product.vendor?.store_name || '',
-        quantity: 1,
-        imageUrl: `https://picsum.photos/seed/${product.id}/300/300`,
-      });
-      toast.success('Đã thêm vào giỏ hàng');
+      if (!isAuthenticated()) {
+        navigate(ROUTES.LOGIN);
+      } else {
+        addItem({
+          id: product.id,
+          name: product.name,
+          price: Number(product.price),
+          compare_price: product.compare_price ? Number(product.compare_price) : null,
+          shop: product.vendor?.store_name || '',
+          quantity: 1,
+          imageUrl: `https://picsum.photos/seed/${product.id}/300/300`,
+        });
+        toast.success('Đã thêm vào giỏ hàng');
+      }
     }, []);
 
     return (
@@ -56,7 +56,7 @@ const ProductCard = memo(
         </div>
         <div className='p-4'>
           <span className='text-xs text-[#1E3A8A] font-semibold uppercase tracking-wider'>
-            {product.vendor?.store_name }
+            {product.vendor?.store_name}
           </span>
           <h3 className='text-gray-900 font-medium mt-1 mb-2 line-clamp-2'>{product.name}</h3>
           <div className='flex justify-between items-center mt-4'>
@@ -77,7 +77,7 @@ const ProductCard = memo(
   (prevProps, nextProps) => {
     // Only re-render if the product itself changed (by id)
     return prevProps.product.id === nextProps.product.id;
-  }
+  },
 );
 
 ProductCard.displayName = 'ProductCard';
@@ -118,10 +118,7 @@ const ListProduct = () => {
           className={`${products.length > 0 ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : ''}`}
         >
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </InfiniteScroll>
       )}

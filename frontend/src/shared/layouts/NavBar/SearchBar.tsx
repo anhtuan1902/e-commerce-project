@@ -3,6 +3,7 @@ import { Search, X, Loader2 } from 'lucide-react';
 import { getSearchSuggestions } from '@/features/products/api/product.api';
 import { useDebounce } from '../../utils/useDebounce';
 import { useProductsStore } from '@/features/products/store/products.store';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -12,6 +13,7 @@ interface SearchBarProps {
 const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<{ id: number; name: string; price: string }[]>([]);
@@ -57,11 +59,22 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
     setShowDropdown(true);
 
     getSearchSuggestions(query)
-      .then((results) => { if (!cancelled) setSuggestions(results); })
-      .catch(() => { if (!cancelled) { setSuggestions([]); setError('Không thể tải gợi ý'); } })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
+      .then((results) => {
+        if (!cancelled) setSuggestions(results as []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSuggestions([]);
+          setError('Không thể tải gợi ý');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedQuery]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +87,7 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
     setShowDropdown(false);
     setSuggestions([]);
     onSearch?.(query);
+    
     setSelectedCategoryId(null);
   };
 
@@ -123,13 +137,19 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
             placeholder={placeholder}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => { if (input.trim()) setShowDropdown(true); }}
+            onFocus={() => {
+              if (input.trim()) setShowDropdown(true);
+            }}
             className='w-full pl-8 sm:pl-10 pr-10 py-1.5 sm:py-2 text-xs sm:text-sm rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent'
           />
           {isLoading ? (
             <Loader2 className='absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin' />
           ) : input ? (
-            <button onClick={clearInput} type='button' className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'>
+            <button
+              onClick={clearInput}
+              type='button'
+              className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+            >
               <X className='h-4 w-4' />
             </button>
           ) : null}
@@ -179,7 +199,8 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
             {isEmptyState && (
               <div className='px-4 py-6 text-center'>
                 <p className='text-sm text-gray-500 dark:text-gray-400'>
-                  Không tìm thấy kết quả cho <strong className='text-gray-700 dark:text-gray-200'>&quot;{input}&quot;</strong>
+                  Không tìm thấy kết quả cho{' '}
+                  <strong className='text-gray-700 dark:text-gray-200'>&quot;{input}&quot;</strong>
                 </p>
                 <p className='text-xs text-gray-400 dark:text-gray-500 mt-1'>
                   Nhấn Enter để tìm kiếm hoặc thử cụm từ khác
@@ -198,9 +219,19 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
             {suggestions.length > 0 && (
               <div className='border-t border-gray-100 dark:border-gray-700 px-4 py-2 flex items-center justify-between'>
                 <span className='text-xs text-gray-400 dark:text-gray-500'>
-                  Nhấn <kbd className='px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>↑↓</kbd> để chọn, <kbd className='px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>Enter</kbd> để tìm
+                  Nhấn{' '}
+                  <kbd className='px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>
+                    ↑↓
+                  </kbd>{' '}
+                  để chọn,{' '}
+                  <kbd className='px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'>
+                    Enter
+                  </kbd>{' '}
+                  để tìm
                 </span>
-                <span className='text-xs text-gray-400 dark:text-gray-400'>{suggestions.length} gợi ý</span>
+                <span className='text-xs text-gray-400 dark:text-gray-400'>
+                  {suggestions.length} gợi ý
+                </span>
               </div>
             )}
           </div>

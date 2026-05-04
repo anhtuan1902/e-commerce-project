@@ -9,8 +9,7 @@ const PROVIDERS = {
   POSTGRES: 'postgres',
   AIVEN: 'aiven',
   SUPABASE: 'supabase',
-  
-  
+
   // MySQL-based providers
   MYSQL: 'mysql',
 
@@ -30,7 +29,7 @@ const DIALECTS = {
 
 const getSSLOptions = (provider) => {
   const sslProviders = ['aiven', 'supabase'];
-  
+
   if (sslProviders.includes(provider)) {
     return {
       ssl: {
@@ -39,7 +38,7 @@ const getSSLOptions = (provider) => {
       },
     };
   }
-  
+
   return {};
 };
 
@@ -136,7 +135,9 @@ const getProviderConfig = (provider, env) => {
 
   const configFn = configs[provider];
   if (!configFn) {
-    throw new Error(`Unknown provider "${provider}". Available: ${Object.keys(PROVIDERS).join(', ')}`);
+    throw new Error(
+      `Unknown provider "${provider}". Available: ${Object.keys(PROVIDERS).join(', ')}`,
+    );
   }
 
   return configFn();
@@ -150,7 +151,7 @@ const createSequelize = () => {
   const provider = process.env.DB_PROVIDER || process.env.DB_DIALECT || 'postgres';
   const dialect = getDialect(provider);
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   // Build config from provider
   const providerConfig = getProviderConfig(provider, process.env);
 
@@ -170,12 +171,12 @@ const createSequelize = () => {
     },
     dialectOptions: getSSLOptions(provider),
   };
-  
+
   // Connection via URI (most providers)
   if (providerConfig.uri) {
     const parsed = parseConnectionUri(providerConfig.uri);
     console.log(`[DB] Connecting to: ${parsed.host}:${parsed.port}/${parsed.name}`);
-    
+
     return new Sequelize(providerConfig.uri, {
       ...baseConfig,
       dialectOptions: {
@@ -184,17 +185,12 @@ const createSequelize = () => {
       },
     });
   }
-  
-  return new Sequelize(
-    providerConfig.name,
-    providerConfig.user,
-    providerConfig.password,
-    {
-      ...baseConfig,
-      host: providerConfig.host,
-      port: providerConfig.port,
-    },
-  );
+
+  return new Sequelize(providerConfig.name, providerConfig.user, providerConfig.password, {
+    ...baseConfig,
+    host: providerConfig.host,
+    port: providerConfig.port,
+  });
 };
 
 module.exports = createSequelize;

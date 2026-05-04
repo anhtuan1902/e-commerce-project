@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { useRegister } from '../hooks/useRegister';
 import { RegisterCustomerRequestSchema, RegisterVendorRequestSchema } from '../schemas/auth.schema';
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const RegisterForm = () => {
@@ -13,10 +13,7 @@ const RegisterForm = () => {
   const [accountType, setAccountType] = useState<'customer' | 'vendor'>('customer');
   const { mutate } = useRegister();
 
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const registerForm = useForm({
     resolver: zodResolver(
       accountType === 'customer' ? RegisterCustomerRequestSchema : RegisterVendorRequestSchema,
     ),
@@ -36,6 +33,11 @@ const RegisterForm = () => {
             store_name: '',
           },
   });
+
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = registerForm;
 
   const handleSubmitRegister = (data: any) => {
     const result =
@@ -85,61 +87,65 @@ const RegisterForm = () => {
             Tôi là Người bán
           </button>
         </div>
-
-        <form className='space-y-5' onSubmit={handleSubmit(handleSubmitRegister)}>
-          <CustomInput
-            label='Họ và tên'
-            type='text'
-            placeholder='Nguyễn Văn A'
-            icon={User}
-            name='name'
-            error={errors.name}
-          />
-
-          <CustomInput
-            label='Email'
-            type='email'
-            placeholder='Nhập email...'
-            icon={Mail}
-            name='email'
-            error={errors.email}
-          />
-
-          {accountType === 'vendor' && (
+        <FormProvider {...registerForm}>
+          <form className='space-y-5' onSubmit={handleSubmit(handleSubmitRegister)}>
             <CustomInput
-              label='Tên cửa hàng'
+              label='Họ và tên'
               type='text'
-              placeholder='Tên shop của bạn...'
-              icon={Store}
-              name='store_name'
-              error={errors.store_name}
+              placeholder='Nguyễn Văn A'
+              icon={User}
+              name='name'
+              error={errors.name}
             />
-          )}
 
-          <CustomInput
-            label='Mật khẩu'
-            type='password'
-            placeholder='••••••••'
-            icon={Lock}
-            name='password'
-          />
+            <CustomInput
+              label='Email'
+              type='email'
+              autoComplete='email'
+              placeholder='Nhập email...'
+              icon={Mail}
+              name='email'
+              error={errors.email}
+            />
 
-          <CustomInput
-            label='Xác nhận mật khẩu'
-            type='password'
-            placeholder='••••••••'
-            icon={Lock}
-            name='confirm_password'
-            error={errors.confirm_password}
-          />
+            {accountType === 'vendor' && (
+              <CustomInput
+                label='Tên cửa hàng'
+                type='text'
+                placeholder='Tên shop của bạn...'
+                icon={Store}
+                name='store_name'
+                error={errors.store_name}
+              />
+            )}
 
-          <button
-            type='submit'
-            className='w-full bg-[#1E3A8A] text-white py-3 rounded-xl font-bold hover:bg-[#1E3A8A] transition-colors'
-          >
-            Đăng ký {accountType === 'vendor' ? 'Cửa hàng' : 'Tài khoản'}
-          </button>
-        </form>
+            <CustomInput
+              label='Mật khẩu'
+              type='password'
+              autoComplete='current-password'
+              placeholder='••••••••'
+              icon={Lock}
+              name='password'
+            />
+
+            <CustomInput
+              label='Xác nhận mật khẩu'
+              type='password'
+              autoComplete='new-password'
+              placeholder='••••••••'
+              icon={Lock}
+              name='confirm_password'
+              error={errors.confirm_password}
+            />
+
+            <button
+              type='submit'
+              className='w-full bg-[#1E3A8A] text-white py-3 rounded-xl font-bold hover:bg-[#1E3A8A] transition-colors'
+            >
+              Đăng ký {accountType === 'vendor' ? 'Cửa hàng' : 'Tài khoản'}
+            </button>
+          </form>
+        </FormProvider>
 
         <div className='mt-6 text-center text-sm text-gray-600'>
           Đã có tài khoản?{' '}

@@ -82,7 +82,7 @@ module.exports = {
         allowNull: true,
         comment: 'Array of tags',
       },
-      attributes: {
+      product_attributes: {
         type: Sequelize.JSON,
         allowNull: true,
         comment: 'Product attributes like color, size, etc.',

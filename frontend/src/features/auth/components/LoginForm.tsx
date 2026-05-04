@@ -43,6 +43,7 @@ const LoginForm = () => {
             <CustomInput
               label='Email'
               type='email'
+              autoComplete='email'
               placeholder='you@example.com'
               icon={Mail}
               name='email'
@@ -50,6 +51,7 @@ const LoginForm = () => {
             />
             <CustomInput
               label='Mật khẩu'
+              autoComplete='current-password'
               type='password'
               placeholder='••••••••'
               icon={Lock}
