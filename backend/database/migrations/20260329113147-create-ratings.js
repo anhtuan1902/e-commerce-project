@@ -40,7 +40,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
-      rating: {
+      rating_value: {
         type: Sequelize.SMALLINT,
         allowNull: false,
         validate: {
@@ -87,7 +87,7 @@ module.exports = {
     await queryInterface.addIndex('ratings', ['user_id']);
     await queryInterface.addIndex('ratings', ['product_id']);
     await queryInterface.addIndex('ratings', ['order_id']);
-    await queryInterface.addIndex('ratings', ['rating']);
+    await queryInterface.addIndex('ratings', ['rating_value']);
     await queryInterface.addIndex('ratings', ['status']);
     await queryInterface.addIndex('ratings', ['user_id', 'product_id'], { unique: true });
   },

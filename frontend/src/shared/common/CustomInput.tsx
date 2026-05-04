@@ -10,12 +10,14 @@ type CustomInputProps = {
   error?: FieldError;
   name: string;
   disabled?: boolean;
+  autoComplete?: string;
 };
 
 const CustomInput = ({
   label,
   type = 'text',
   placeholder = '',
+  autoComplete,
   icon: Icon,
   rows = 3,
   error,
@@ -59,6 +61,7 @@ const CustomInput = ({
                 <input
                   {...field}
                   type={type}
+                  autoComplete={autoComplete}
                   placeholder={placeholder}
                   disabled={disabled}
                   className={baseClass}
@@ -67,7 +70,13 @@ const CustomInput = ({
             }
           />
         ) : (
-          <input type={type} placeholder={placeholder} disabled={disabled} className={baseClass} />
+          <input
+            type={type}
+            autoComplete={autoComplete}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={baseClass}
+          />
         )}
       </div>
 

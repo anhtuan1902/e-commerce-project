@@ -1,20 +1,21 @@
-import { useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuthStore } from '../store/auth.store';
-import { Product, ProductImage } from '../features/products/types/product.type';
+import { ROUTES } from '@/shared/constants/routes.constants';
+import isAuthenticated from '@/shared/utils/auth';
+import navigateAuth from '@/shared/utils/navigateAuth';
+import { useCartStore } from '@/store/cart.store';
+import { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { NavigateFunction, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Breadcrumb from '../features/products/components/Breadcrumb';
+import ProductActions, { ActionButtons } from '../features/products/components/ProductActions';
+import ProductDetailLoader from '../features/products/components/ProductDetailLoader';
+import ProductDetails from '../features/products/components/ProductDetails';
 import ProductGallery from '../features/products/components/ProductGallery';
 import ProductInfo from '../features/products/components/ProductInfo';
-import ShippingInfo from '../features/products/components/ShippingInfo';
-import ProductActions, { ActionButtons } from '../features/products/components/ProductActions';
-import TrustBadges from '../features/products/components/TrustBadges';
-import ShopProfile from '../features/products/components/ShopProfile';
-import ProductDetails from '../features/products/components/ProductDetails';
 import ProductReviews, { Review } from '../features/products/components/ProductReviews';
-import ProductDetailLoader from '../features/products/components/ProductDetailLoader';
-import toast from 'react-hot-toast';
-import { ROUTES } from '@/shared/constants/routes.constants';
-import { useCartStore } from '@/store/cart.store';
+import ShippingInfo from '../features/products/components/ShippingInfo';
+import ShopProfile from '../features/products/components/ShopProfile';
+import TrustBadges from '../features/products/components/TrustBadges';
+import { Product, ProductImage } from '../features/products/types/product.type';
 
 const ProductDetailPage = () => {
   const navigate = useNavigate();
@@ -29,11 +30,11 @@ const ProductDetailPage = () => {
 
 interface ProductDetailContentProps {
   product: Product;
-  navigate: (path: string) => void;
+  navigate: NavigateFunction;
 }
 
 const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) => {
-  const currentUser = useAuthStore((s) => s.user);
+  const location = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState<Review[]>([]);
 
@@ -55,7 +56,9 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
         id: r.id || i,
         customer_name: r.user?.profile?.name || r.user?.email || 'Khách hàng',
         rating: r.rating,
-        date: r.createdAt ? new Date(r.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        date: r.createdAt
+          ? new Date(r.createdAt).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
         comment: r.comment || '',
         is_verified: r.is_verified_purchase,
         title: r.title,
@@ -80,6 +83,11 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
   }, [product.images, mainImage]);
 
   const handleAddToCart = () => {
+    if (!isAuthenticated()) {
+      toast.error('Vui lòng đăng nhập!');
+      navigateAuth(navigate, location);
+      return;
+    }
     if (stockQuantity === 0) {
       toast.error('Sản phẩm đã hết hàng');
       return;
@@ -97,9 +105,9 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
   };
 
   const handleBuyNow = () => {
-    if (!currentUser) {
+    if (!isAuthenticated()) {
       toast.error('Vui lòng đăng nhập!');
-      navigate('/login');
+      navigateAuth(navigate, location);
       return;
     }
     if (stockQuantity === 0) {
@@ -157,7 +165,7 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
             </div>
           </div>
 
-          <ShippingInfo transport_to={product.vendor?.address}  />
+          <ShippingInfo transport_to={product.vendor?.address} />
 
           <div className='flex items-center mb-4'>
             <span className='text-gray-500 text-sm w-24 shrink-0'>Màu sắc</span>
@@ -165,9 +173,7 @@ const ProductDetailContent = ({ product, navigate }: ProductDetailContentProps) 
               {['Đen Nhám', 'Trắng Sứ'].map((color) => (
                 <button
                   key={color}
-                  className={`border-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    'border-gray-300 text-gray-700 hover:border-[#1E3A8A] hover:text-[#1E3A8A]'
-                  }`}
+                  className={`border-2 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${'border-gray-300 text-gray-700 hover:border-[#1E3A8A] hover:text-[#1E3A8A]'}`}
                 >
                   {color}
                 </button>

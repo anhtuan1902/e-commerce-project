@@ -10,4 +10,3 @@ redis.on('error', (err) => console.error('❌ Redis error:', err));
 redis.on('reconnecting', () => console.log('♻️ Redis reconnecting...'));
 
 module.exports = redis;
-

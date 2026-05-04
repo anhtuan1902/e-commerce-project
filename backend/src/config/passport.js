@@ -42,13 +42,6 @@ passport.use(
               avatar,
             });
           }
-        } else {
-          // Ensure profile exists with avatar
-          await UserProfile.upsert({
-            user_id: user.id,
-            name,
-            avatar,
-          });
         }
 
         if (!user.isActive) {

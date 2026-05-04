@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'production';
-const provider = process.env.DB_PROVIDER || process.env.DB_DIALECT || 'postgres';
 
 const baseConfig = {
   logging: isProduction ? false : console.log,
@@ -19,6 +18,8 @@ const baseConfig = {
 };
 
 const getProviderConfig = (env = process.env) => {
+  const currentProvider = env.DB_PROVIDER || env.DB_DIALECT || 'postgres';
+
   const configs = {
     // === AIVEN CLOUD ===
     aiven: () => ({
@@ -82,16 +83,26 @@ const getProviderConfig = (env = process.env) => {
     }),
   };
 
-  const configFn = configs[provider];
-  if (!configFn) {
-    return configs.postgres();
-  }
-  return configFn();
+  const configFn = configs[currentProvider];
+  return configFn ? configFn() : configs.postgres();
 };
 
 const buildConfig = (env = process.env) => {
   const providerConfig = getProviderConfig(env);
-  const dialect = providerConfig.dialect || (provider === 'mysql' ? 'mysql' : 'postgres');
+  const currentProvider = env.DB_PROVIDER || env.DB_DIALECT || 'postgres';
+  const dialect = providerConfig.dialect || (currentProvider === 'mysql' ? 'mysql' : 'postgres');
+
+  // Nếu dùng url (aiven, supabase) thì truyền trực tiếp
+  if (providerConfig.url) {
+    return {
+      ...baseConfig,
+      url: providerConfig.url,
+      dialect,
+      dialectOptions: {
+        ssl: { require: true, rejectUnauthorized: false },
+      },
+    };
+  }
 
   return {
     ...baseConfig,
@@ -101,9 +112,9 @@ const buildConfig = (env = process.env) => {
     host: providerConfig.host,
     port: providerConfig.port || 5432,
     dialect,
-    dialectOptions: providerConfig.ssl ? {
-      ssl: { require: true, rejectUnauthorized: false },
-    } : {},
+    dialectOptions: providerConfig.ssl
+      ? { ssl: { require: true, rejectUnauthorized: false } }
+      : {},
   };
 };
 
@@ -115,6 +126,7 @@ module.exports = {
     DB_HOST: process.env.DB_HOST || 'localhost',
   }),
   production: buildConfig({
+    ...process.env,
     DB_USER: process.env.PRO_DB_USER,
     DB_PASSWORD: process.env.PRO_DB_PASSWORD,
     DB_NAME: process.env.PRO_DB_NAME,
