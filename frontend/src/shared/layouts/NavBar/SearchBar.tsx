@@ -4,6 +4,8 @@ import { getSearchSuggestions } from '@/features/products/api/product.api';
 import { useDebounce } from '../../utils/useDebounce';
 import { useProductsStore } from '@/features/products/store/products.store';
 import { useNavigate } from 'react-router-dom';
+import { useUIStore } from '@/store/ui.store';
+import { ROUTES } from '@/shared/constants/routes.constants';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -15,7 +17,9 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const [input, setInput] = useState('');
+  const input = useUIStore((s) => s.searchInput);
+  const setInput = useUIStore((s) => s.setSearchInput);
+  const clearSearchInput = useUIStore((s) => s.clearSearchInput);
   const [suggestions, setSuggestions] = useState<{ id: number; name: string; price: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -87,7 +91,7 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
     setShowDropdown(false);
     setSuggestions([]);
     onSearch?.(query);
-    
+    navigate(ROUTES.HOME);
     setSelectedCategoryId(null);
   };
 
@@ -100,7 +104,8 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', onSearch }: SearchBarProps)
   };
 
   const clearInput = () => {
-    setInput('');
+    clearSearchInput();
+
     setSuggestions([]);
     setShowDropdown(false);
     setHighlightedIndex(-1);
