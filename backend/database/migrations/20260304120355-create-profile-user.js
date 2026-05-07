@@ -22,10 +22,10 @@ module.exports = {
         onDelete: 'CASCADE',
       },
 
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
 
       avatar: {
         type: Sequelize.STRING(500),
@@ -60,7 +60,6 @@ module.exports = {
       },
     });
 
-    // Index giúp query nhanh hơn
     await queryInterface.addIndex('user_profiles', ['user_id']);
     await queryInterface.addIndex('user_profiles', ['name']);
     await queryInterface.addIndex('user_profiles', ['phone']);

@@ -29,7 +29,7 @@ class MoMoService extends BasePaymentService {
    * @returns {Promise<{success: boolean, paymentUrl?: string, qrCode?: string, deeplink?: string, transactionId: string}>}
    */
   async createPayment(params) {
-    const { order, user, req } = params;
+    const { order, user } = params;
 
     // Validate amount
     if (!this.validateAmount(order.total_amount)) {
@@ -190,7 +190,7 @@ class MoMoService extends BasePaymentService {
     if (callbackData.extraData) {
       try {
         extraData = JSON.parse(callbackData.extraData);
-      } catch (e) {
+      } catch {
         // ignore parse error
       }
     }
@@ -297,7 +297,7 @@ class MoMoService extends BasePaymentService {
       };
     }
 
-    const { resultCode, orderId, transId } = callbackData;
+    const { resultCode, orderId } = callbackData;
 
     try {
       // Parse extraData
@@ -305,7 +305,7 @@ class MoMoService extends BasePaymentService {
       if (callbackData.extraData) {
         try {
           extraData = JSON.parse(callbackData.extraData);
-        } catch (e) {
+        } catch {
           // ignore
         }
       }

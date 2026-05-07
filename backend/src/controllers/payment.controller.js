@@ -129,16 +129,18 @@ const handleCallback = async (req, res) => {
       callbackData.resultCode === 0 ||
       callbackData.vnp_ResponseCode === '00';
 
-    const result = isSuccess
-      ? await paymentService.handleSuccess({
-          ...callbackData,
-          orderId: payment.order_id,
-        })
-      : await paymentService.handleFailure({
-          ...callbackData,
-          orderId: payment.order_id,
-          failureReason: callbackData.message || callbackData.vnp_ResponseCode,
-        });
+    if (isSuccess) {
+      await paymentService.handleSuccess({
+        ...callbackData,
+        orderId: payment.order_id,
+      });
+    } else {
+      await paymentService.handleFailure({
+        ...callbackData,
+        orderId: payment.order_id,
+        failureReason: callbackData.message || callbackData.vnp_ResponseCode,
+      });
+    }
 
     // Redirect về frontend
     const redirectUrl = `${process.env.FRONTEND_URL}/payment/${gateway}/${isSuccess ? 'success' : 'failure'}?orderId=${payment.order_id}`;

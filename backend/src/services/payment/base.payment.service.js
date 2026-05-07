@@ -22,16 +22,16 @@ class BasePaymentService {
    * @param {Object} params - Thông tin thanh toán
    * @returns {Promise<{success: boolean, paymentUrl?: string, qrCode?: string, transactionId: string}>}
    */
-  async createPayment(params) {
+  async createPayment(_params) {
     throw new Error('Must implement createPayment()');
   }
 
   /**
    * Xác thực callback từ gateway - Implement theo từng gateway
-   * @param {Object} callbackData - Data từ gateway callback
+   * @param {Object} _callbackData - Data từ gateway callback
    * @returns {boolean}
    */
-  verifyCallback(callbackData) {
+  verifyCallback(_callbackData) {
     throw new Error('Must implement verifyCallback()');
   }
 
@@ -41,7 +41,7 @@ class BasePaymentService {
    * @returns {Promise<Object>}
    */
   async handleSuccess(callbackData) {
-    const { orderId, transactionId, amount, gatewayResponse } = callbackData;
+    const { orderId, transactionId, gatewayResponse } = callbackData;
     
     const transaction = await sequelize.transaction();
     
@@ -63,7 +63,7 @@ class BasePaymentService {
           payment_date: new Date(),
           gateway_response: gatewayResponse || callbackData,
         },
-        { transaction }
+        { transaction },
       );
 
       // 2. Update Order payment_status
@@ -71,7 +71,7 @@ class BasePaymentService {
       if (order) {
         await order.update(
           { payment_status: 'paid' },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -116,7 +116,7 @@ class BasePaymentService {
             failure_reason: failureReason || 'Payment failed',
             gateway_response: gatewayResponse || callbackData,
           },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -125,7 +125,7 @@ class BasePaymentService {
       if (order) {
         await order.update(
           { payment_status: 'failed' },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -146,21 +146,21 @@ class BasePaymentService {
 
   /**
    * Yêu cầu hoàn tiền - Implement theo từng gateway
-   * @param {Object} payment - Payment record
-   * @param {number} amount - Số tiền muốn hoàn
-   * @param {string} reason - Lý do hoàn tiền
+   * @param {Object} _payment - Payment record
+   * @param {number} _amount - Số tiền muốn hoàn
+   * @param {string} _reason - Lý do hoàn tiền
    * @returns {Promise<Object>}
    */
-  async requestRefund(payment, amount, reason) {
+  async requestRefund(_payment, _amount, _reason) {
     throw new Error('Must implement requestRefund()');
   }
 
   /**
    * Xác thực callback hoàn tiền - Implement theo từng gateway
-   * @param {Object} callbackData - Data từ gateway
+   * @param {Object} _callbackData - Data từ gateway
    * @returns {boolean}
    */
-  verifyRefundCallback(callbackData) {
+  verifyRefundCallback(_callbackData) {
     throw new Error('Must implement verifyRefundCallback()');
   }
 
@@ -316,9 +316,9 @@ class BasePaymentService {
     const refundableAmount = payment.getRefundableAmount();
     
     if (refundAmount > refundableAmount) {
-      return { 
-        valid: false, 
-        error: `Refund amount exceeds refundable amount. Max: ${this.formatCurrency(refundableAmount)}` 
+      return {
+        valid: false,
+        error: `Refund amount exceeds refundable amount. Max: ${this.formatCurrency(refundableAmount)}`,
       };
     }
 

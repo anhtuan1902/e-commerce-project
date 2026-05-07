@@ -19,7 +19,7 @@ class CODService extends BasePaymentService {
    * @returns {Promise<{success: boolean, payment: Payment, message: string}>}
    */
   async createPayment(params) {
-    const { order, user } = params;
+    const { order } = params;
 
     // Validate amount
     if (!this.validateAmount(order.total_amount)) {
@@ -52,10 +52,10 @@ class CODService extends BasePaymentService {
 
   /**
    * Xác thực callback - COD không có callback từ gateway
-   * @param {Object} callbackData
+   * @param {Object} _callbackData
    * @returns {boolean}
    */
-  verifyCallback(callbackData) {
+  verifyCallback(_callbackData) {
     // COD không cần verify callback
     // Luôn trả về true vì không có gateway bên ngoài
     return true;
@@ -132,10 +132,10 @@ class CODService extends BasePaymentService {
 
   /**
    * Xác thực callback hoàn tiền - COD không có
-   * @param {Object} callbackData
+   * @param {Object} _callbackData
    * @returns {boolean}
    */
-  verifyRefundCallback(callbackData) {
+  verifyRefundCallback(_callbackData) {
     return true;
   }
 

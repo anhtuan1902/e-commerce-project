@@ -28,7 +28,7 @@ class VNPayService extends BasePaymentService {
    * @returns {Promise<{success: boolean, paymentUrl: string, transactionId: string}>}
    */
   async createPayment(params) {
-    const { order, user, req } = params;
+    const { order, req } = params;
 
     // Debug log amount type
     console.log(`[VNPay] Order total_amount: ${order.total_amount}, type: ${typeof order.total_amount}`);
@@ -75,7 +75,7 @@ class VNPayService extends BasePaymentService {
    * Tạo payment URL với signature VNPay
    * @private
    */
-  _createPaymentUrl({ amount, orderId, transactionId, orderInfo, clientIp }) {
+  _createPaymentUrl({ amount, transactionId, orderInfo, clientIp }) {
     const params = {
       vnp_Version: '2.1.0',
       vnp_Command: 'pay',
@@ -116,7 +116,6 @@ class VNPayService extends BasePaymentService {
   verifyCallback(callbackData) {
     const {
       vnp_SecureHash,
-      vnp_SecureHashType,
       ...params
     } = callbackData;
 
@@ -260,7 +259,7 @@ class VNPayService extends BasePaymentService {
       };
     }
 
-    const { vnp_ResponseCode, vnp_TxnRef, vnp_Amount } = callbackData;
+    const { vnp_ResponseCode, vnp_TxnRef } = callbackData;
 
     try {
       // Find payment by transaction ID
