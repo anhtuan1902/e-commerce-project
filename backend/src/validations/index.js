@@ -346,11 +346,7 @@ const createOrderSchema = z.object({
     .int('ID địa chỉ giao hàng phải là số nguyên')
     .positive('ID địa chỉ giao hàng phải là số dương'),
 
-  billing_address_id: z
-    .number()
-    .int('ID địa chỉ thanh toán phải là số nguyên')
-    .positive('ID địa chỉ thanh toán phải là số dương')
-    .optional(),
+  payment_method: z.enum(['cod', 'momo', 'vnpay']).default('cod'),
 
   order_items: z
     .array(
@@ -370,11 +366,6 @@ const createOrderSchema = z.object({
     .min(1, 'Đơn hàng phải có ít nhất một sản phẩm'),
 
   notes: z.string().max(1000, 'Ghi chú không được vượt quá 1000 ký tự').optional(),
-
-  customer_notes: z
-    .string()
-    .max(1000, 'Ghi chú khách hàng không được vượt quá 1000 ký tự')
-    .optional(),
 });
 
 // ─────────────────────────────────────────────────────

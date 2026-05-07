@@ -11,15 +11,17 @@ interface OrderSummaryProps {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
+  shippingFee: number;
   discount: number;
+  isLoading?: boolean;
   onBack: () => void;
   onConfirmOrder?: () => void;
 }
 
 export const OrderSummary = memo<OrderSummaryProps>(
-  ({ items, totalPrice, discount, onBack, onConfirmOrder }) => {
+  ({ items, totalPrice, shippingFee, discount, isLoading = false, onBack, onConfirmOrder }) => {
     const discountAmount = calculateDiscountPrice(totalPrice, discount);
-    const finalPrice = calculateCheckoutTotalPrice(totalPrice, 0, discount);
+    const finalPrice = calculateCheckoutTotalPrice(totalPrice, shippingFee, discount);
 
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-24">
@@ -53,7 +55,7 @@ export const OrderSummary = memo<OrderSummaryProps>(
           </div>
           <div className="flex justify-between text-slate-500 text-sm">
             <span>Phí vận chuyển</span>
-            <span>{convertCurrency(0)}</span>
+            <span>{convertCurrency(shippingFee)}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-green-600 text-sm font-medium">
@@ -69,9 +71,20 @@ export const OrderSummary = memo<OrderSummaryProps>(
 
         <button
           onClick={onConfirmOrder}
-          className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+          disabled={isLoading || items.length === 0}
+          className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          XÁC NHẬN ĐẶT HÀNG
+          {isLoading ? (
+            <>
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Đang xử lý...
+            </>
+          ) : (
+            'XÁC NHẬN ĐẶT HÀNG'
+          )}
         </button>
 
         <button

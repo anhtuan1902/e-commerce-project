@@ -1,103 +1,178 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StepState } from '@/features/checkout';
+import { StepState, PaymentMethod, type ShippingAddress } from '@/features/checkout/types/checkout.types';
 import { CartStep, CheckoutStep, Stepper, SuccessStep } from '@/features/checkout/components';
-import { AddressItem } from '@/features/profiles/types/addresses.type';
+import { type PaymentMethodOption } from '@/features/checkout/api/payment.api';
+import { type PaymentMethodConfig } from '@/features/checkout/components/PaymentOption';
 import useAddresses from '@/features/profiles/hooks/useAddresses';
-import { useCartStore } from '@/store/cart.store';
+import { useCheckout } from '@/features/checkout/hooks/useCheckout';
+import { getPaymentMethods } from '@/features/checkout/api/payment.api';
 import { ROUTES } from '@/shared/constants/routes.constants';
-import { ProtectedRoute } from '@/shared/common/ProtectedRoute';
+import { useQuery } from '@tanstack/react-query';
 
-export const STEP_STORAGE_KEY = 'cart-checkout-step';
+const STEP_STORAGE_KEY = 'cart-checkout-step';
 
 export const CartCheckoutPage = () => {
-  const [step, setStep] = useState<StepState>(() => {
-    const saved = sessionStorage.getItem(STEP_STORAGE_KEY);
-    return (saved as StepState) || 'cart';
-  });
-  const [discount, setDiscount] = useState<number>(0);
-  const [orderCode, setOrderCode] = useState<string>('');
-  const [selectedAddressId, setSelectedAddressId] = useState<number | undefined>(undefined);
-
-  const { addresses } = useAddresses();
-  const items = useCartStore((state) => state.items);
-  const totalItems = useCartStore((state) => state.getTotalItems());
-  const totalPrice = useCartStore((state) => state.getTotalPrice());
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
-  const removeItem = useCartStore((state) => state.removeItem);
-  const clearCart = useCartStore((state) => state.clearCart);
-
-  const defaultAddressId = addresses.find((a) => a.is_default)?.id;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    sessionStorage.setItem(STEP_STORAGE_KEY, step);
-  }, [step]);
+  // Checkout state từ hook
+  const {
+    currentStep,
+    paymentMethod,
+    shippingAddress,
+    orderCode,
+    cartItems,
+    summary,
+    isCreatingOrder,
+    isCreatingPayment,
+    error,
+    setStep,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    setPaymentMethod,
+    setShippingAddress,
+    placeOrder,
+    reset,
+  } = useCheckout();
 
+  // Fetch addresses
+  const { addresses } = useAddresses();
+
+  // Fetch enabled payment methods từ API
+  const { data: paymentMethodsData, isError } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: getPaymentMethods,
+  });
+
+  // Convert API payment methods sang format component, lọc bỏ methods bị disable
+  const enabledPaymentMethods: PaymentMethodConfig[] = (paymentMethodsData || [])
+    .filter((method) => method.enabled)
+    .map((method) => ({
+      id: method.code,
+      label: method.name,
+      description: method.description,
+      enabled: true,
+    }));
+
+  // Sync step với sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(STEP_STORAGE_KEY, currentStep);
+  }, [currentStep]);
+
+  // Set step handler
   const handleStepChange = useCallback(
     (newStep: StepState) => {
       setStep(newStep);
-      if (newStep === 'checkout' && addresses.length > 0 && !selectedAddressId) {
-        setSelectedAddressId(defaultAddressId);
+      
+      // Auto-select default address when entering checkout
+      if (newStep === 'checkout' && addresses.length > 0 && !shippingAddress) {
+        const defaultAddr = addresses.find((a) => a.is_default && a.id);
+        if (defaultAddr && defaultAddr.id) {
+          setShippingAddress({
+            id: defaultAddr.id,
+            name: defaultAddr.name,
+            phone: defaultAddr.phone,
+            address: defaultAddr.address_detail,
+            isDefault: defaultAddr.is_default,
+            type: defaultAddr.type,
+          });
+        }
       }
     },
-    [addresses.length, selectedAddressId, defaultAddressId],
+    [addresses, shippingAddress, setStep, setShippingAddress],
   );
 
-  const handleAddressChange = useCallback((address: AddressItem) => {
-    setSelectedAddressId(address.id);
-  }, []);
+  // Address change handler
+  const handleAddressChange = useCallback(
+    (address: ShippingAddress) => {
+      setShippingAddress(address);
+    },
+    [setShippingAddress],
+  );
 
-  const handleBackToCart = useCallback(() => setStep('cart'), []);
+  // Back to cart
+  const handleBackToCart = useCallback(() => {
+    setStep('cart');
+  }, [setStep]);
 
-  const handleConfirmOrder = useCallback(() => {
-    setOrderCode(Math.random().toString(36).substring(2, 8).toUpperCase());
-    setStep('success');
-  }, []);
-
-  const renderStep = (currentStep: StepState) => {
-    if (currentStep === 'cart') {
-      return (
-        <CartStep
-          cartItems={items}
-          totalItems={totalItems}
-          totalPrice={totalPrice}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeItem}
-          onClearCart={clearCart}
-          onCheckout={() => handleStepChange('checkout')}
-        />
-      );
+  // Place order - gọi API
+  const handleConfirmOrder = useCallback(async () => {
+    const result = await placeOrder();
+    
+    if (!result.success) {
+      // Error đã được set trong hook
+      console.error('Order failed:', error);
     }
+  }, [placeOrder, error]);
 
-    if (currentStep === 'checkout') {
-      return (
-        <CheckoutStep
-          cartItems={items}
-          totalItems={totalItems}
-          totalPrice={totalPrice}
-          discount={discount}
-          shippingAddresses={addresses}
-          selectedAddressId={selectedAddressId}
-          onBack={handleBackToCart}
-          onAddressChange={handleAddressChange}
-          onNavigateToAddresses={() => navigate(ROUTES.PROFILE)}
-          onConfirmOrder={handleConfirmOrder}
-        />
-      );
+  // Continue shopping
+  const handleContinueShopping = useCallback(() => {
+    reset();
+    navigate(ROUTES.HOME);
+  }, [reset, navigate]);
+
+  // Render step content
+  const renderStep = (step: StepState) => {
+    const isLoading = isCreatingOrder || isCreatingPayment;
+
+    switch (step) {
+      case 'cart':
+        return (
+          <CartStep
+            cartItems={cartItems}
+            subtotal={summary.subtotal}
+            totalItems={summary.totalItems}
+            totalPrice={summary.totalPrice}
+            shippingFee={summary.shippingFee}
+            onUpdateQuantity={(id, delta) => updateQuantity(Number(id), delta)}
+            onRemoveItem={(id) => removeItem(Number(id))}
+            onClearCart={clearCart}
+            onCheckout={() => handleStepChange('checkout')}
+          />
+        );
+
+      case 'checkout':
+        return (
+          <CheckoutStep
+            cartItems={cartItems}
+            totalItems={summary.totalItems}
+            totalPrice={summary.subtotal}
+            shippingFee={summary.shippingFee}
+            discount={summary.discount}
+            shippingAddresses={addresses}
+            selectedAddress={shippingAddress}
+            paymentMethod={paymentMethod}
+            enabledPaymentMethods={enabledPaymentMethods}
+            isLoading={isLoading}
+            error={error}
+            onBack={handleBackToCart}
+            onAddressChange={handleAddressChange}
+            onNavigateToAddresses={() => navigate(ROUTES.PROFILE)}
+            onPaymentMethodChange={setPaymentMethod}
+            onConfirmOrder={handleConfirmOrder}
+          />
+        );
+
+      case 'success':
+        return (
+          <SuccessStep
+            orderCode={orderCode || 'N/A'}
+            onContinueShopping={handleContinueShopping}
+          />
+        );
+
+      default:
+        return null;
     }
-
-    if (currentStep === 'success') {
-      return <SuccessStep orderCode={orderCode} onContinueShopping={() => navigate(ROUTES.HOME)} />;
-    }
-
-    return null;
   };
 
   return (
-    <div className='max-w-6xl mx-auto px-4 min-h-auto bg-slate-50'>
-      <Stepper currentStep={step} />
-      {renderStep(step)}
+    <div className="max-w-6xl mx-auto px-4 min-h-auto bg-slate-50">
+      <Stepper currentStep={currentStep} />
+      {renderStep(currentStep)}
     </div>
   );
 };
+
+export { STEP_STORAGE_KEY };

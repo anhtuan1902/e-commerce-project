@@ -88,24 +88,12 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
-      billing_address_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'addresses',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
+      
       notes: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      customer_notes: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
+      
       ordered_at: {
         type: Sequelize.DATE,
         allowNull: false,

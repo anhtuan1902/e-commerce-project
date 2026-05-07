@@ -265,6 +265,9 @@ const AddressCard = React.memo<AddressCardProps>(
 
 AddressCard.displayName = 'AddressCard';
 
+export { AddressFormModal };
+export type { AddressItem };
+
 const Address = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);

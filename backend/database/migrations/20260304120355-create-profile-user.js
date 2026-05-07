@@ -22,10 +22,10 @@ module.exports = {
         onDelete: 'CASCADE',
       },
 
-      name: {
-        type: Sequelize.STRING,
-        allowNull: true, // null nếu đăng nhập bằng Google
-      },
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
       avatar: {
         type: Sequelize.STRING(500),

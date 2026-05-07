@@ -459,12 +459,7 @@ async function seedProducts(categories, vendors) {
       height: faker.number.float({ min: 1, max: 50, fractionDigits: 1 }),
     };
 
-    const status = faker.helpers.weightedArrayElement([
-      { value: 'active', weight: 70 },
-      { value: 'draft', weight: 15 },
-      { value: 'inactive', weight: 10 },
-      { value: 'archived', weight: 5 },
-    ]);
+    const status = 'active';
 
     try {
       await Product.create({

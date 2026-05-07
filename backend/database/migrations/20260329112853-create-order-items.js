@@ -77,7 +77,7 @@ module.exports = {
         allowNull: false,
         defaultValue: 0.0,
       },
-      attributes: {
+      item_attributes: {
         type: Sequelize.JSON,
         allowNull: true,
         comment: 'Product attributes like color, size, etc.',
