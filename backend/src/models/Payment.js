@@ -30,7 +30,7 @@ const Payment = sequelize.define(
       allowNull: false,
     },
     payment_gateway: {
-      type: DataTypes.ENUM('stripe', 'paypal', 'vnpay', 'momo', 'zalopay', 'manual'),
+      type: DataTypes.ENUM('cod', 'stripe', 'paypal', 'vnpay', 'momo', 'zalopay', 'manual'),
       allowNull: true,
     },
     transaction_id: {

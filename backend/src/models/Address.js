@@ -79,7 +79,8 @@ const Address = sequelize.define(
 
 // Method để lấy địa chỉ đầy đủ
 Address.prototype.getFullAddress = function () {
-  return `${this.address_detail}, ${this.ward}, ${this.district}, ${this.city}`;
+  const parts = [this.address_detail, this.ward, this.city];
+  return parts.join(', ');
 };
 
 Address.associate = (models) => {
@@ -91,10 +92,6 @@ Address.associate = (models) => {
   Address.hasMany(models.Order, {
     foreignKey: 'shipping_address_id',
     as: 'shippingOrders',
-  });
-  Address.hasMany(models.Order, {
-    foreignKey: 'billing_address_id',
-    as: 'billingOrders',
   });
 };
 

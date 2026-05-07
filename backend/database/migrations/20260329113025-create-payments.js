@@ -33,7 +33,7 @@ module.exports = {
         allowNull: false,
       },
       payment_gateway: {
-        type: Sequelize.ENUM('stripe', 'paypal', 'vnpay', 'momo', 'zalopay', 'manual'),
+        type: Sequelize.ENUM('cod', 'stripe', 'paypal', 'vnpay', 'momo', 'zalopay', 'manual'),
         allowNull: true,
       },
       transaction_id: {

@@ -8,15 +8,17 @@ import { EmptyCart } from './EmptyCart';
 interface CartStepProps {
   cartItems: CartItem[];
   totalItems: number;
+  subtotal: number;
   totalPrice: number;
+  shippingFee: number;
   onUpdateQuantity: (id: number, delta: number) => void;
   onRemoveItem: (id: number) => void;
   onClearCart: () => void;
   onCheckout: () => void;
 }
 
-const CartSummary = memo<Pick<CartStepProps, 'totalItems' | 'totalPrice' | 'onCheckout'>>(
-  function CartSummary({ totalItems, totalPrice, onCheckout }) {
+const CartSummary = memo<Pick<CartStepProps, 'subtotal' | 'totalItems' | 'totalPrice' | 'onCheckout' | 'shippingFee'>>(
+  function CartSummary({ totalItems, totalPrice, onCheckout, shippingFee, subtotal }) {
     return (
       <div className="space-y-4">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
@@ -41,11 +43,11 @@ const CartSummary = memo<Pick<CartStepProps, 'totalItems' | 'totalPrice' | 'onCh
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-slate-500 text-sm">
               <span>Tạm tính ({totalItems} sản phẩm)</span>
-              <span>{convertCurrency(totalPrice)}</span>
+              <span>{convertCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-slate-500 text-sm">
               <span>Phí vận chuyển</span>
-              <span className="text-green-600 font-medium italic">Miễn phí</span>
+              <span className="text-green-600 font-medium italic">{convertCurrency(shippingFee)}</span>
             </div>
             <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
               <span className="font-bold text-slate-900">Tổng cộng</span>
@@ -78,8 +80,10 @@ CartSummary.displayName = 'CartSummary';
 
 export const CartStep = memo<CartStepProps>(function CartStep({
   cartItems,
+  subtotal,
   totalItems,
   totalPrice,
+  shippingFee,
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
@@ -116,7 +120,7 @@ export const CartStep = memo<CartStepProps>(function CartStep({
         </div>
       </div>
 
-      <CartSummary totalItems={totalItems} totalPrice={totalPrice} onCheckout={onCheckout} />
+      <CartSummary totalItems={totalItems} totalPrice={totalPrice} onCheckout={onCheckout} shippingFee={shippingFee} subtotal={subtotal} />
     </div>
   );
 });

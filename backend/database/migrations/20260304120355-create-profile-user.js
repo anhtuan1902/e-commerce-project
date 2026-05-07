@@ -24,7 +24,7 @@ module.exports = {
 
       name: {
         type: Sequelize.STRING,
-        allowNull: true, // null nếu đăng nhập bằng Google
+        allowNull: false,
       },
 
       avatar: {
@@ -60,7 +60,6 @@ module.exports = {
       },
     });
 
-    // Index giúp query nhanh hơn
     await queryInterface.addIndex('user_profiles', ['user_id']);
     await queryInterface.addIndex('user_profiles', ['name']);
     await queryInterface.addIndex('user_profiles', ['phone']);

@@ -1,4 +1,4 @@
-import { CreditCard, Smartphone, Truck } from 'lucide-react';
+import { CreditCard, Smartphone, Truck, Building2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import type { PaymentMethod } from '../types/checkout.types';
 
@@ -7,6 +7,7 @@ interface PaymentOptionProps {
   label: string;
   description: string;
   isSelected: boolean;
+  disabled?: boolean;
   onSelect: (id: PaymentMethod) => void;
 }
 
@@ -18,21 +19,29 @@ const getPaymentIcon = (methodId: PaymentMethod, isActive: boolean) => {
       return <Truck {...iconProps} />;
     case 'momo':
       return <Smartphone {...iconProps} />;
-    case 'card':
-      return <CreditCard {...iconProps} />;
+    case 'vnpay':
+      return <Building2 {...iconProps} />;
     default:
       return <CreditCard {...iconProps} />;
   }
 };
 
 export const PaymentOption = memo<PaymentOptionProps>(
-  ({ id, label, description, isSelected, onSelect }) => {
-    const handleChange = useCallback(() => onSelect(id), [id, onSelect]);
+  ({ id, label, description, isSelected, disabled = false, onSelect }) => {
+    const handleChange = useCallback(() => {
+      if (!disabled) {
+        onSelect(id);
+      }
+    }, [id, disabled, onSelect]);
 
     return (
       <label
         className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-          isSelected ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-100 hover:border-slate-200'
+          isSelected
+            ? 'border-indigo-600 bg-indigo-50/50'
+            : disabled
+            ? 'border-slate-100 opacity-50 cursor-not-allowed'
+            : 'border-slate-100 hover:border-slate-200'
         }`}
       >
         <input
@@ -41,6 +50,7 @@ export const PaymentOption = memo<PaymentOptionProps>(
           className="mt-1 accent-indigo-600 h-4 w-4"
           checked={isSelected}
           onChange={handleChange}
+          disabled={disabled}
         />
         <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-100">
           {getPaymentIcon(id, isSelected)}
@@ -56,8 +66,9 @@ export const PaymentOption = memo<PaymentOptionProps>(
 
 PaymentOption.displayName = 'PaymentOption';
 
-export const PAYMENT_METHODS: { id: PaymentMethod; label: string; description: string }[] = [
-  { id: 'cod', label: 'Thanh toán khi nhận hàng', description: 'Thanh toán khi nhận hàng' },
-  { id: 'momo', label: 'Thanh toán qua MoMo', description: 'Thanh toán qua MoMo' },
-  { id: 'card', label: 'Thanh toán qua Visa/Mastercard', description: 'Thanh toán qua Visa/Mastercard' },
-];
+export interface PaymentMethodConfig {
+  id: PaymentMethod;
+  label: string;
+  description: string;
+  enabled: boolean;
+}

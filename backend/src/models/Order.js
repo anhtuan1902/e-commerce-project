@@ -83,19 +83,7 @@ const Order = sequelize.define(
         key: 'id',
       },
     },
-    billing_address_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'addresses',
-        key: 'id',
-      },
-    },
     notes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    customer_notes: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
@@ -218,11 +206,6 @@ Order.associate = (models) => {
   Order.belongsTo(models.Address, {
     foreignKey: 'shipping_address_id',
     as: 'shippingAddress',
-    onDelete: 'SET NULL',
-  });
-  Order.belongsTo(models.Address, {
-    foreignKey: 'billing_address_id',
-    as: 'billingAddress',
     onDelete: 'SET NULL',
   });
   Order.hasMany(models.OrderVendor, {
